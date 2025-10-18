@@ -1,0 +1,54 @@
+{
+  "transactions": [
+    {
+      "txnId": 1,
+      "accNo": 100,
+      "amount": 5000.0,
+      "location": "New York",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "status": "clean",
+      "alerts": [],
+      "type": "purchase"
+    },
+    {
+      "txnId": 2,
+      "accNo": 101,
+      "amount": 15000.0,
+      "location": "London",
+      "timestamp": "2024-01-15T09:15:00Z",
+      "status": "clean",
+      "alerts": [],
+      "type": "transfer"
+    },
+    {
+      "txnId": 3,
+      "accNo": 102,
+      "amount": 75000.0,
+      "location": "Tokyo",
+      "timestamp": "2024-01-15T08:45:00Z",
+      "status": "suspicious",
+      "alerts": ["High-value transaction"],
+      "type": "withdrawal"
+    },
+    {
+      "txnId": 4,
+      "accNo": 100,
+      "amount": 2000.0,
+      "location": "New York",
+      "timestamp": "2024-01-14T14:20:00Z",
+      "status": "clean",
+      "alerts": [],
+      "type": "purchase"
+    },
+    {
+      "txnId": 5,
+      "accNo": 103,
+      "amount": 10000.0,
+      "location": "Paris",
+      "timestamp": "2024-01-14T16:20:00Z",
+      "status": "clean",
+      "alerts": [],
+      "type": "transfer"
+    }
+  ]
+}
