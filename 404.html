@@ -3,57 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fraud Detection System - GitHub Hosted</title>
+    <title>Fraud Detection System | Premium Security Suite</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
+        <!-- Premium Header -->
         <header>
             <h1>🔍 Fraud Detection System</h1>
-            <p>Powered by GitHub Pages & Actions</p>
+            <p>Advanced AI-Powered Transaction Monitoring</p>
+            <div class="header-badge">PREMIUM SECURITY SUITE</div>
         </header>
 
+        <!-- Premium Form Section -->
         <div class="transaction-form">
-            <h2>Process Transaction</h2>
+            <div class="form-header">
+                <div class="form-icon">💳</div>
+                <h2>Process Transaction</h2>
+            </div>
+            
             <form id="transactionForm">
-                <div class="form-group">
-                    <label for="accNo">Account Number:</label>
-                    <select id="accNo" required>
-                        <option value="">Select Account</option>
-                        <option value="100">100 - User1</option>
-                        <option value="101">101 - User2</option>
-                        <option value="102">102 - User3</option>
-                        <option value="103">103 - User4</option>
-                        <option value="104">104 - User5</option>
-                    </select>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="accNo">ACCOUNT NUMBER</label>
+                        <div class="input-group">
+                            <select id="accNo" required>
+                                <option value="">Select Account</option>
+                                <option value="100">100 - Alice Smith (Premium)</option>
+                                <option value="101">101 - Bob Johnson (Standard)</option>
+                                <option value="102">102 - Carol Davis (Business)</option>
+                                <option value="103">103 - David Wilson (Standard)</option>
+                                <option value="104">104 - Eva Brown (Premium)</option>
+                            </select>
+                            <div class="input-icon">👤</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount">TRANSACTION AMOUNT ($)</label>
+                        <div class="input-group">
+                            <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" required>
+                            <div class="input-icon">💰</div>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="amount">Amount ($):</label>
-                    <input type="number" id="amount" step="0.01" min="0" required>
+                    <label for="location">TRANSACTION LOCATION</label>
+                    <div class="input-group">
+                        <select id="location" required>
+                            <option value="">Select Location</option>
+                            <option value="New York">🗽 New York</option>
+                            <option value="London">🇬🇧 London</option>
+                            <option value="Tokyo">🗼 Tokyo</option>
+                            <option value="Paris">🇫🇷 Paris</option>
+                            <option value="Sydney">🇦🇺 Sydney</option>
+                            <option value="Dubai">🇦🇪 Dubai</option>
+                        </select>
+                        <div class="input-icon">🌍</div>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="location">Location:</label>
-                    <select id="location" required>
-                        <option value="">Select Location</option>
-                        <option value="New York">New York</option>
-                        <option value="London">London</option>
-                        <option value="Tokyo">Tokyo</option>
-                        <option value="Paris">Paris</option>
-                        <option value="Sydney">Sydney</option>
-                    </select>
+
+                <div class="btn-group">
+                    <button type="submit" id="submitBtn" class="btn btn-primary">
+                        <span>🔍 Analyze Transaction</span>
+                    </button>
+                    <button type="button" id="quickScan" class="btn btn-secondary">
+                        <span>⚡ Quick Security Scan</span>
+                    </button>
                 </div>
-                
-                <button type="submit" id="submitBtn">Process Transaction</button>
             </form>
         </div>
 
-        <div id="results" class="results-container"></div>
+        <!-- Premium Dashboard Section -->
+        <div class="results-container">
+            <div class="section-header">
+                <h3 class="section-title">📊 Security Dashboard</h3>
+                <div class="section-actions">
+                    <button class="action-btn" id="exportReport">📈 Export Report</button>
+                    <button class="action-btn" id="refreshStats">🔄 Refresh</button>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTransactions">0</div>
+                    <div class="stat-label">Total Transactions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="cleanTransactions">0</div>
+                    <div class="stat-label">Clean Transactions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="suspiciousTransactions">0</div>
+                    <div class="stat-label">Suspicious Flags</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="fraudRate">0%</div>
+                    <div class="stat-label">Fraud Detection Rate</div>
+                </div>
+            </div>
+            
+            <!-- Results will be displayed here -->
+            <div id="results"></div>
+        </div>
         
+        <!-- Transaction History Section -->
         <div id="transactionHistory" class="history-container">
-            <h3>Recent Transactions</h3>
-            <div id="historyList"></div>
+            <div class="section-header">
+                <h3 class="section-title">📋 Recent Transactions</h3>
+                <div class="section-actions">
+                    <button class="action-btn" id="clearHistory">🗑️ Clear</button>
+                    <button class="action-btn" id="exportData">💾 Export</button>
+                </div>
+            </div>
+            <div id="historyList" class="transaction-grid"></div>
         </div>
     </div>
 
