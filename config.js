@@ -1,11 +1,20 @@
 
 const CONFIG = {
-    // Use GitHub Pages base URL for API calls
-    BASE_URL: window.location.hostname === 'localhost' 
-        ? 'http://localhost:3000'
-        : `${window.location.origin}/api`,
     
-    // GitHub repository info (update with your repo)
-    REPO: 'yourusername/fraud-detection-system',
-    BRANCH: 'main'
+    VERSION: "1.0.0",
+    DEBUG: true,
+    
+   
+    FEATURES: {
+        LOCAL_STORAGE: true,
+        FRAUD_DETECTION: true,
+        EXPORT_REPORTS: true
+    },
+        THRESHOLDS: {
+        HIGH_VALUE: 50000,
+        VERY_HIGH_VALUE: 100000,
+        RAPID_TRANSACTIONS: 2
+    }
 };
+
+console.log('Fraud Detection System Config Loaded');
