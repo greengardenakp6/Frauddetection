@@ -1,0 +1,59 @@
+{
+  "accounts": [
+    {
+      "accNo": 100,
+      "name": "Alice Smith",
+      "balance": 150000.0,
+      "lastLocation": "New York",
+      "lastTxnTime": "2024-01-15T10:30:00Z",
+      "isActive": true,
+      "accountType": "premium",
+      "dailyLimit": 100000.0,
+      "monthlyLimit": 500000.0
+    },
+    {
+      "accNo": 101,
+      "name": "Bob Johnson",
+      "balance": 75000.0,
+      "lastLocation": "London",
+      "lastTxnTime": "2024-01-15T09:15:00Z",
+      "isActive": true,
+      "accountType": "standard",
+      "dailyLimit": 50000.0,
+      "monthlyLimit": 200000.0
+    },
+    {
+      "accNo": 102,
+      "name": "Carol Davis",
+      "balance": 250000.0,
+      "lastLocation": "Tokyo",
+      "lastTxnTime": "2024-01-15T08:45:00Z",
+      "isActive": true,
+      "accountType": "business",
+      "dailyLimit": 200000.0,
+      "monthlyLimit": 1000000.0
+    },
+    {
+      "accNo": 103,
+      "name": "David Wilson",
+      "balance": 50000.0,
+      "lastLocation": "Paris",
+      "lastTxnTime": "2024-01-14T16:20:00Z",
+      "isActive": true,
+      "accountType": "standard",
+      "dailyLimit": 25000.0,
+      "monthlyLimit": 100000.0
+    },
+    {
+      "accNo": 104,
+      "name": "Eva Brown",
+      "balance": 300000.0,
+      "lastLocation": "Sydney",
+      "lastTxnTime": "2024-01-15T11:00:00Z",
+      "isActive": true,
+      "accountType": "premium",
+      "dailyLimit": 150000.0,
+      "monthlyLimit": 750000.0
+    }
+  ]
+}
