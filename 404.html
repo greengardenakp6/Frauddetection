@@ -553,7 +553,7 @@
     </div>
 
     <script>
-        // Simple configuration
+        // Improved configuration
         const CONFIG = {
             accounts: [
                 { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
@@ -561,14 +561,20 @@
                 { accNo: 102, name: "Carol Davis", balance: 250000, type: "Business" },
                 { accNo: 103, name: "David Wilson", balance: 50000, type: "Standard" },
                 { accNo: 104, name: "Eva Brown", balance: 300000, type: "Premium" }
-            ]
+            ],
+            thresholds: {
+                highValue: 50000,
+                veryHighValue: 100000,
+                rapidTransactionCount: 3, // Increased from 2 to 3
+                rapidTransactionMinutes: 5 // 5 minutes window
+            }
         };
 
-        // Fraud Detection System
+        // Improved Fraud Detection System
         class FraudDetectionSystem {
             constructor() {
                 this.transactions = [];
-                this.accounts = CONFIG.accounts;
+                this.accounts = JSON.parse(JSON.stringify(CONFIG.accounts)); // Deep copy
                 this.init();
             }
 
@@ -580,13 +586,8 @@
             }
 
             setupEventListeners() {
-                // Transaction form
                 document.getElementById('transactionForm').addEventListener('submit', (e) => this.handleTransaction(e));
-                
-                // Quick scan button
                 document.getElementById('quickScan').addEventListener('click', () => this.quickSecurityScan());
-                
-                // Action buttons
                 document.getElementById('exportReport').addEventListener('click', () => this.exportReport());
                 document.getElementById('refreshStats').addEventListener('click', () => this.refreshStats());
                 document.getElementById('clearHistory').addEventListener('click', () => this.clearHistory());
@@ -641,16 +642,19 @@
                     throw new Error('Insufficient balance');
                 }
 
-                const fraudAlerts = this.detectFraud(transactionData);
+                // Improved fraud detection
+                const fraudResult = this.detectFraud(transactionData);
+                
+                // Update account balance
                 account.balance -= transactionData.amount;
 
                 const transaction = {
                     id: Date.now(),
                     ...transactionData,
                     timestamp: new Date().toLocaleString(),
-                    alerts: fraudAlerts,
-                    status: fraudAlerts.includes("No fraud detected") ? 'clean' : 'suspicious',
-                    riskScore: this.calculateRiskScore(fraudAlerts)
+                    alerts: fraudResult.alerts,
+                    status: fraudResult.isSuspicious ? 'suspicious' : 'clean',
+                    riskScore: fraudResult.riskScore
                 };
 
                 this.transactions.unshift(transaction);
@@ -665,44 +669,69 @@
 
             detectFraud(transaction) {
                 const alerts = [];
+                let riskScore = 0;
 
-                if (transaction.amount > 50000) {
-                    alerts.push("High-value transaction detected");
-                }
-
-                if (transaction.amount > 100000) {
+                // High value checks (more reasonable thresholds)
+                if (transaction.amount > CONFIG.thresholds.veryHighValue) {
                     alerts.push("Very high-value transaction");
+                    riskScore += 50;
+                } else if (transaction.amount > CONFIG.thresholds.highValue) {
+                    alerts.push("High-value transaction");
+                    riskScore += 25;
                 }
 
+                // Improved rapid transactions check (5-minute window)
+                const fiveMinutesAgo = Date.now() - (CONFIG.thresholds.rapidTransactionMinutes * 60 * 1000);
                 const recentTransactions = this.transactions.filter(t => 
-                    t.accNo === transaction.accNo
-                ).slice(0, 3);
+                    t.accNo === transaction.accNo && 
+                    new Date(t.timestamp).getTime() > fiveMinutesAgo
+                );
 
-                if (recentTransactions.length >= 2) {
-                    alerts.push("Multiple rapid transactions");
+                if (recentTransactions.length >= CONFIG.thresholds.rapidTransactionCount) {
+                    alerts.push("Multiple rapid transactions detected");
+                    riskScore += 30;
                 }
 
+                // Location change check (only if there's a previous transaction)
                 const lastTransaction = this.transactions.find(t => t.accNo === transaction.accNo);
                 if (lastTransaction && lastTransaction.location !== transaction.location) {
-                    alerts.push("Geographic anomaly detected");
+                    // Only flag if locations are very far apart (simplified)
+                    const farLocations = (lastTransaction.location === "Tokyo" && transaction.location === "New York") ||
+                                       (lastTransaction.location === "London" && transaction.location === "Sydney");
+                    if (farLocations) {
+                        alerts.push("Impossible travel detected");
+                        riskScore += 40;
+                    } else {
+                        alerts.push("Location change detected");
+                        riskScore += 10;
+                    }
                 }
 
-                if (transaction.amount % 1000 === 0) {
+                // Round amount check
+                if (transaction.amount % 1000 === 0 && transaction.amount > 1000) {
                     alerts.push("Round amount transaction");
+                    riskScore += 5;
                 }
 
-                return alerts.length > 0 ? alerts : ["No fraud detected"];
-            }
+                // Determine if suspicious
+                const isSuspicious = riskScore > 20; // Lower threshold
 
-            calculateRiskScore(alerts) {
-                if (alerts.includes("No fraud detected")) return 0;
-                return Math.min(alerts.length * 25, 100);
+                // If no specific alerts, mark as clean
+                if (alerts.length === 0) {
+                    alerts.push("No fraud detected");
+                }
+
+                return {
+                    alerts: alerts,
+                    riskScore: Math.min(riskScore, 100),
+                    isSuspicious: isSuspicious
+                };
             }
 
             displayResults(result) {
                 const resultsDiv = document.getElementById('results');
                 const riskScore = result.transaction.riskScore;
-                const riskLevel = riskScore > 50 ? 'high' : riskScore > 25 ? 'medium' : 'low';
+                const riskLevel = riskScore >= 60 ? 'high' : riskScore >= 30 ? 'medium' : 'low';
                 
                 let html = `
                     <div class="alert alert-success">
@@ -715,7 +744,7 @@
 
                 result.transaction.alerts.forEach(alert => {
                     const isWarning = !alert.includes("No fraud detected");
-                    const alertClass = isWarning ? 'alert-warning' : 'alert-success';
+                    const alertClass = isWarning ? 'alert-warning' : 'alert-info';
                     const icon = isWarning ? '⚠️' : '✅';
                     
                     html += `<div class="alert ${alertClass}">${icon} ${alert}</div>`;
@@ -724,8 +753,10 @@
                 resultsDiv.innerHTML = html;
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
-                if (riskScore > 50) {
+                if (riskScore >= 60) {
                     this.showAlert('🚨 High-risk transaction detected!', 'warning');
+                } else if (riskScore >= 30) {
+                    this.showAlert('⚠️ Medium-risk transaction detected', 'warning');
                 } else {
                     this.showAlert('✅ Transaction processed successfully', 'success');
                 }
@@ -733,7 +764,9 @@
 
             loadTransactionHistory() {
                 const saved = localStorage.getItem('fraudTransactions');
-                this.transactions = saved ? JSON.parse(saved) : [];
+                if (saved) {
+                    this.transactions = JSON.parse(saved);
+                }
                 this.displayTransactionHistory();
             }
 
@@ -790,7 +823,7 @@
                 this.showAlert('🔍 Running security scan...', 'info');
                 
                 setTimeout(() => {
-                    const threats = Math.random() > 0.7 ? ['Unusual pattern detected'] : [];
+                    const threats = Math.random() > 0.8 ? ['Unusual pattern detected'] : [];
                     
                     if (threats.length > 0) {
                         this.showAlert('🚨 Security threats detected!', 'warning');
@@ -812,7 +845,9 @@
                     statistics: {
                         totalTransactions: this.transactions.length,
                         cleanTransactions: this.transactions.filter(t => t.status === 'clean').length,
-                        suspiciousTransactions: this.transactions.filter(t => t.status === 'suspicious').length
+                        suspiciousTransactions: this.transactions.filter(t => t.status === 'suspicious').length,
+                        fraudRate: this.transactions.length > 0 ? 
+                            ((this.transactions.filter(t => t.status === 'suspicious').length / this.transactions.length) * 100).toFixed(1) : 0
                     },
                     recentTransactions: this.transactions.slice(0, 5)
                 };
@@ -886,7 +921,7 @@
             }
         }
 
-        
+        // Initialize the system when page loads
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing system...');
             window.fraudSystem = new FraudDetectionSystem();
