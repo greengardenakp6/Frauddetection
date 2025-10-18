@@ -1,353 +1,260 @@
-// Configuration for Premium Fraud Detection System
+// Simple configuration
 const CONFIG = {
-    // GitHub Pages base URL
-    BASE_URL: window.location.origin,
-    
-    // Features
-    FEATURES: {
-        LOCAL_STORAGE: true,
-        SIMULATION_MODE: true,
-        DATA_EXPORT: true,
-        PREMIUM_UI: true
-    },
-    
-    // Premium account data
-    DEFAULTS: {
-        accounts: [
-            { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
-            { accNo: 101, name: "Bob Johnson", balance: 75000, type: "Standard" },
-            { accNo: 102, name: "Carol Davis", balance: 250000, type: "Business" },
-            { accNo: 103, name: "David Wilson", balance: 50000, type: "Standard" },
-            { accNo: 104, name: "Eva Brown", balance: 300000, type: "Premium" }
-        ],
-        locations: ["New York", "London", "Tokyo", "Paris", "Sydney", "Dubai"]
-    }
+    accounts: [
+        { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
+        { accNo: 101, name: "Bob Johnson", balance: 75000, type: "Standard" },
+        { accNo: 102, name: "Carol Davis", balance: 250000, type: "Business" },
+        { accNo: 103, name: "David Wilson", balance: 50000, type: "Standard" },
+        { accNo: 104, name: "Eva Brown", balance: 300000, type: "Premium" }
+    ]
 };
 
-/**
- * Premium Fraud Detection System
- * Enhanced with premium UI features
- */
-class PremiumFraudDetectionSystem {
+// Simple Fraud Detection System
+class FraudDetectionSystem {
     constructor() {
         this.transactions = [];
-        this.accounts = CONFIG.DEFAULTS.accounts;
+        this.accounts = CONFIG.accounts;
         this.init();
     }
 
     init() {
+        console.log('Fraud Detection System Started');
         this.setupEventListeners();
         this.loadTransactionHistory();
-        this.updateAccountDropdown();
         this.updateStats();
-        console.log('🎯 Premium Fraud Detection System Initialized');
     }
 
     setupEventListeners() {
         // Transaction form
-        document.getElementById('transactionForm')
-            .addEventListener('submit', (e) => this.handleTransaction(e));
-        
+        const transactionForm = document.getElementById('transactionForm');
+        if (transactionForm) {
+            transactionForm.addEventListener('submit', (e) => this.handleTransaction(e));
+        }
+
         // Quick scan button
-        document.getElementById('quickScan')
-            .addEventListener('click', () => this.quickSecurityScan());
-        
-        // Action buttons
-        document.getElementById('exportReport')
-            .addEventListener('click', () => this.exportReport());
-        document.getElementById('refreshStats')
-            .addEventListener('click', () => this.refreshStats());
-        document.getElementById('clearHistory')
-            .addEventListener('click', () => this.clearHistory());
-        document.getElementById('exportData')
-            .addEventListener('click', () => this.exportData());
+        const quickScanBtn = document.getElementById('quickScan');
+        if (quickScanBtn) {
+            quickScanBtn.addEventListener('click', () => this.quickSecurityScan());
+        }
+
+        // Refresh stats button
+        const refreshBtn = document.getElementById('refreshStats');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => this.refreshStats());
+        }
+
+        // Export button
+        const exportBtn = document.getElementById('exportReport');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportReport());
+        }
     }
 
-    updateAccountDropdown() {
-        const accNoSelect = document.getElementById('accNo');
-        accNoSelect.innerHTML = '<option value="">Select Account</option>';
-        
-        this.accounts.forEach(account => {
-            const option = document.createElement('option');
-            option.value = account.accNo;
-            option.textContent = `${account.accNo} - ${account.name} (${account.type}) - $${account.balance.toLocaleString()}`;
-            accNoSelect.appendChild(option);
-        });
-    }
-
-    async handleTransaction(e) {
+    handleTransaction(e) {
         e.preventDefault();
         
+        // Get form values
         const accNo = document.getElementById('accNo').value;
         const amount = parseFloat(document.getElementById('amount').value);
         const location = document.getElementById('location').value;
-        
-        if (!accNo || !amount || !location) {
-            this.showNotification('Please fill all fields', 'warning');
+
+        // Basic validation
+        if (!accNo || !amount || amount <= 0 || !location) {
+            this.showAlert('Please fill all fields correctly', 'error');
             return;
         }
 
+        // Disable button and show loading
         const submitBtn = document.getElementById('submitBtn');
         const originalText = submitBtn.innerHTML;
-        
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<div class="loading-spinner"></div> Analyzing...';
-        
-        try {
-            const result = await this.processTransaction({
-                accNo: parseInt(accNo),
-                amount: amount,
-                location: location
-            });
-            
-            this.displayPremiumResults(result);
-            this.loadTransactionHistory();
-            this.updateStats();
-            
-        } catch (error) {
-            this.displayError(error.message);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        }
+        submitBtn.innerHTML = 'Processing...';
+
+        // Process transaction after short delay
+        setTimeout(() => {
+            try {
+                const result = this.processTransaction({
+                    accNo: parseInt(accNo),
+                    amount: amount,
+                    location: location
+                });
+                
+                this.displayResults(result);
+                this.loadTransactionHistory();
+                this.updateStats();
+                
+            } catch (error) {
+                this.showAlert('Error: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }, 1000);
     }
 
-    async quickSecurityScan() {
-        this.showNotification('🔍 Running comprehensive security scan...', 'info');
-        
-        // Simulate security scan
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        const threats = Math.random() > 0.7 ? ['Unusual pattern detected'] : [];
-        
-        if (threats.length > 0) {
-            this.showNotification('🚨 Security threats detected!', 'danger');
-        } else {
-            this.showNotification('✅ System secure - No threats found', 'success');
+    processTransaction(transactionData) {
+        // Find account
+        const account = this.accounts.find(acc => acc.accNo === transactionData.accNo);
+        if (!account) {
+            throw new Error('Account not found');
         }
-    }
 
-    async processTransaction(transactionData) {
-        // Simulate API call delay with premium animation
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Advanced fraud detection
-        const alerts = this.premiumFraudDetection(transactionData);
+        // Check balance
+        if (account.balance < transactionData.amount) {
+            throw new Error('Insufficient balance');
+        }
+
+        // Fraud detection
+        const fraudAlerts = this.detectFraud(transactionData);
         
         // Update account balance
-        const account = this.accounts.find(acc => acc.accNo === transactionData.accNo);
-        if (account) {
-            account.balance -= transactionData.amount;
-        }
-        
+        account.balance -= transactionData.amount;
+
         // Save transaction
-        const txn = this.saveTransaction(transactionData, alerts);
-        
-        return { 
-            success: true, 
-            transactionId: txn.id,
-            alerts: alerts,
-            remainingBalance: account?.balance || 0,
-            riskScore: this.calculateRiskScore(alerts)
+        const transaction = {
+            id: Date.now(),
+            ...transactionData,
+            timestamp: new Date().toLocaleString(),
+            alerts: fraudAlerts,
+            status: fraudAlerts.length > 0 ? 'suspicious' : 'clean',
+            riskScore: this.calculateRiskScore(fraudAlerts)
+        };
+
+        this.transactions.unshift(transaction);
+        this.saveToLocalStorage();
+
+        return {
+            success: true,
+            transaction: transaction,
+            remainingBalance: account.balance
         };
     }
 
-    premiumFraudDetection(transaction) {
+    detectFraud(transaction) {
         const alerts = [];
-        let riskLevel = 'low';
-        
-        // High-value check
+
+        // High value check
         if (transaction.amount > 50000) {
-            alerts.push("High-value transaction");
-            riskLevel = 'medium';
-        }
-        
-        if (transaction.amount > 100000) {
-            alerts.push("Very high-value transaction");
-            riskLevel = 'high';
-        }
-        
-        // Rapid transactions check
-        const recentTxns = this.transactions.filter(t => 
-            t.accNo === transaction.accNo && 
-            Date.now() - new Date(t.timestamp).getTime() < 60000
-        );
-        
-        if (recentTxns.length >= 2) {
-            alerts.push("Rapid multiple transactions");
-            riskLevel = 'high';
-        }
-        
-        // Location change check
-        const lastTxn = this.transactions.find(t => t.accNo === transaction.accNo);
-        if (lastTxn && lastTxn.location !== transaction.location) {
-            alerts.push("Geographic anomaly detected");
-            riskLevel = 'medium';
-        }
-        
-        // Time-based detection (unusual hours)
-        const currentHour = new Date().getHours();
-        if (currentHour < 6 || currentHour > 22) {
-            alerts.push("Unusual transaction time");
-            riskLevel = 'medium';
-        }
-        
-        // Round amount detection
-        if (transaction.amount % 1000 === 0) {
-            alerts.push("Round amount transaction");
-            riskLevel = 'low';
+            alerts.push("High-value transaction detected");
         }
 
-        return {
-            alerts: alerts.length > 0 ? alerts : ["No fraud detected"],
-            riskLevel: riskLevel,
-            score: alerts.length * 25
-        };
+        if (transaction.amount > 100000) {
+            alerts.push("Very high-value transaction");
+        }
+
+        // Rapid transactions check
+        const recentTransactions = this.transactions.filter(t => 
+            t.accNo === transaction.accNo
+        ).slice(0, 3);
+
+        if (recentTransactions.length >= 2) {
+            alerts.push("Multiple rapid transactions");
+        }
+
+        // Location change check
+        const lastTransaction = this.transactions.find(t => t.accNo === transaction.accNo);
+        if (lastTransaction && lastTransaction.location !== transaction.location) {
+            alerts.push("Geographic anomaly detected");
+        }
+
+        // Round amount check
+        if (transaction.amount % 1000 === 0) {
+            alerts.push("Round amount transaction");
+        }
+
+        return alerts.length > 0 ? alerts : ["No fraud detected"];
     }
 
     calculateRiskScore(alerts) {
-        return Math.min(alerts.score, 100);
+        if (alerts.includes("No fraud detected")) return 0;
+        return Math.min(alerts.length * 25, 100);
     }
 
-    saveTransaction(transaction, fraudResult) {
-        const txn = {
-            id: Date.now(),
-            ...transaction,
-            timestamp: new Date().toISOString(),
-            alerts: fraudResult.alerts,
-            riskLevel: fraudResult.riskLevel,
-            riskScore: fraudResult.score,
-            status: fraudResult.alerts.includes("No fraud detected") ? 'clean' : 'suspicious'
-        };
+    displayResults(result) {
+        const resultsDiv = document.getElementById('results');
+        if (!resultsDiv) return;
+
+        const riskScore = result.transaction.riskScore;
+        const riskLevel = riskScore > 50 ? 'high' : riskScore > 25 ? 'medium' : 'low';
         
-        this.transactions.unshift(txn);
-        
-        // Save to localStorage
-        if (CONFIG.FEATURES.LOCAL_STORAGE) {
-            localStorage.setItem('premiumFraudTransactions', JSON.stringify(this.transactions));
-            localStorage.setItem('premiumFraudAccounts', JSON.stringify(this.accounts));
+        let html = `
+            <div style="background: #d4edda; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="color: #155724; margin-bottom: 10px;">✅ Transaction Successful</h3>
+                <p><strong>Transaction ID:</strong> ${result.transaction.id}</p>
+                <p><strong>Remaining Balance:</strong> $${result.remainingBalance.toLocaleString()}</p>
+                <p><strong>Risk Score:</strong> ${riskScore}% (${riskLevel} risk)</p>
+            </div>
+        `;
+
+        result.transaction.alerts.forEach(alert => {
+            const isWarning = !alert.includes("No fraud detected");
+            const alertStyle = isWarning ? 
+                "background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;" :
+                "background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #28a745;";
+            
+            const icon = isWarning ? '⚠️' : '✅';
+            
+            html += `<div style="${alertStyle}">${icon} ${alert}</div>`;
+        });
+
+        resultsDiv.innerHTML = html;
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+
+        // Show notification
+        if (riskScore > 50) {
+            this.showAlert('🚨 High-risk transaction detected!', 'warning');
+        } else {
+            this.showAlert('✅ Transaction processed successfully', 'success');
         }
-        
-        this.updateAccountDropdown();
-        return txn;
     }
 
     loadTransactionHistory() {
-        if (CONFIG.FEATURES.LOCAL_STORAGE) {
-            const savedTxns = localStorage.getItem('premiumFraudTransactions');
-            const savedAccounts = localStorage.getItem('premiumFraudAccounts');
-            
-            this.transactions = savedTxns ? JSON.parse(savedTxns) : [];
-            this.accounts = savedAccounts ? JSON.parse(savedAccounts) : CONFIG.DEFAULTS.accounts;
-        }
+        // Load from localStorage
+        const saved = localStorage.getItem('fraudTransactions');
+        this.transactions = saved ? JSON.parse(saved) : [];
         
         this.displayTransactionHistory();
     }
 
     displayTransactionHistory() {
         const historyList = document.getElementById('historyList');
-        const recentTxns = this.transactions.slice(0, 10);
-        
-        if (recentTxns.length === 0) {
+        if (!historyList) return;
+
+        const recentTransactions = this.transactions.slice(0, 10);
+
+        if (recentTransactions.length === 0) {
             historyList.innerHTML = `
-                <div class="no-data">
-                    <div style="font-size: 3em; margin-bottom: 20px;">📊</div>
+                <div style="text-align: center; padding: 40px; color: #6c757d;">
+                    <div style="font-size: 3em; margin-bottom: 10px;">📊</div>
                     <h3>No transactions yet</h3>
-                    <p>Process a transaction to see analytics</p>
+                    <p>Process a transaction to see history</p>
                 </div>
             `;
             return;
         }
-        
-        historyList.innerHTML = recentTxns.map(txn => `
-            <div class="transaction-item ${txn.status} ${txn.riskLevel}">
-                <div class="txn-header">
-                    <div class="txn-account">Account: ${txn.accNo}</div>
-                    <div class="txn-amount">$${txn.amount.toLocaleString()}</div>
+
+        historyList.innerHTML = recentTransactions.map(txn => `
+            <div style="background: white; padding: 20px; margin: 15px 0; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 4px solid ${txn.status === 'suspicious' ? '#ffc107' : '#28a745'};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong>Account: ${txn.accNo}</strong>
+                    <span style="font-weight: bold; color: ${txn.status === 'suspicious' ? '#dc3545' : '#28a745'};">$${txn.amount.toLocaleString()}</span>
                 </div>
-                <div class="txn-details">
-                    <div class="txn-detail">
-                        <span>📍</span> ${txn.location}
-                    </div>
-                    <div class="txn-detail">
-                        <span>🕒</span> ${new Date(txn.timestamp).toLocaleString()}
-                    </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; color: #666; font-size: 0.9em;">
+                    <div>📍 ${txn.location}</div>
+                    <div>🕒 ${txn.timestamp}</div>
                 </div>
-                <div class="alert-badge ${txn.status}">
-                    ${txn.status === 'suspicious' ? '🚨 Suspicious' : '✅ Clean'}
-                    <small>(${txn.riskScore}% risk)</small>
+                <div style="display: inline-block; padding: 5px 15px; background: ${txn.status === 'suspicious' ? '#fff3cd' : '#d4edda'}; color: ${txn.status === 'suspicious' ? '#856404' : '#155724'}; border-radius: 20px; font-size: 0.8em; font-weight: bold;">
+                    ${txn.status === 'suspicious' ? '🚨 Suspicious' : '✅ Clean'} (${txn.riskScore}% risk)
                 </div>
                 ${txn.alerts.length > 0 ? `
-                    <div class="alerts">
-                        ${txn.alerts.map(alert => `<span class="alert-tag">${alert}</span>`).join('')}
+                    <div style="margin-top: 10px;">
+                        ${txn.alerts.map(alert => `
+                            <span style="display: inline-block; background: #e9ecef; padding: 4px 8px; margin: 2px; border-radius: 12px; font-size: 0.8em;">${alert}</span>
+                        `).join('')}
                     </div>
                 ` : ''}
             </div>
         `).join('');
-    }
-
-    displayPremiumResults(result) {
-        const resultsDiv = document.getElementById('results');
-        
-        const riskColor = result.riskScore > 50 ? 'danger' : result.riskScore > 25 ? 'warning' : 'success';
-        const riskIcon = result.riskScore > 50 ? '🚨' : result.riskScore > 25 ? '⚠️' : '✅';
-        
-        let html = `
-            <div class="result-header pulse">
-                <h3>${riskIcon} Transaction Analysis Complete</h3>
-                <div class="txn-id">ID: ${result.transactionId}</div>
-            </div>
-            <div class="risk-score alert alert-${riskColor}">
-                <div class="alert-icon">${riskIcon}</div>
-                <div class="alert-content">
-                    <div class="alert-title">Risk Assessment</div>
-                    <div>Overall Risk Score: <strong>${result.riskScore}%</strong></div>
-                </div>
-            </div>
-            <div class="balance-info alert alert-info">
-                <div class="alert-icon">💰</div>
-                <div class="alert-content">
-                    <div class="alert-title">Account Update</div>
-                    <div>Remaining Balance: <strong>$${result.remainingBalance.toLocaleString()}</strong></div>
-                </div>
-            </div>
-        `;
-        
-        result.alerts.alerts.forEach(alert => {
-            let alertClass = 'alert-warning';
-            let icon = '⚠️';
-            
-            if (alert.includes('No fraud')) {
-                alertClass = 'alert-success';
-                icon = '✅';
-            } else if (alert.includes('High-value')) {
-                alertClass = 'alert-danger';
-                icon = '🚨';
-            } else if (alert.includes('Unusual')) {
-                alertClass = 'alert-info';
-                icon = '🔍';
-            }
-            
-            html += `
-                <div class="alert ${alertClass}">
-                    <div class="alert-icon">${icon}</div>
-                    <div class="alert-content">
-                        <div class="alert-title">Security Alert</div>
-                        <div>${alert}</div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        resultsDiv.innerHTML = html;
-        resultsDiv.scrollIntoView({ behavior: 'smooth' });
-        
-        // Show notification
-        if (result.riskScore > 50) {
-            this.showNotification('🚨 High-risk transaction detected!', 'danger');
-        } else {
-            this.showNotification('✅ Transaction processed successfully', 'success');
-        }
     }
 
     updateStats() {
@@ -356,57 +263,53 @@ class PremiumFraudDetectionSystem {
         const suspicious = this.transactions.filter(t => t.status === 'suspicious').length;
         const fraudRate = total > 0 ? ((suspicious / total) * 100).toFixed(1) : 0;
 
-        document.getElementById('totalTransactions').textContent = total;
-        document.getElementById('cleanTransactions').textContent = clean;
-        document.getElementById('suspiciousTransactions').textContent = suspicious;
-        document.getElementById('fraudRate').textContent = `${fraudRate}%`;
+        // Update stat cards
+        this.updateStatCard('totalTransactions', total);
+        this.updateStatCard('cleanTransactions', clean);
+        this.updateStatCard('suspiciousTransactions', suspicious);
+        this.updateStatCard('fraudRate', fraudRate + '%');
+    }
+
+    updateStatCard(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+    quickSecurityScan() {
+        this.showAlert('🔍 Running security scan...', 'info');
+        
+        setTimeout(() => {
+            const threats = Math.random() > 0.7 ? ['Unusual pattern detected'] : [];
+            
+            if (threats.length > 0) {
+                this.showAlert('🚨 Security threats detected!', 'warning');
+            } else {
+                this.showAlert('✅ System secure - No threats found', 'success');
+            }
+        }, 2000);
     }
 
     refreshStats() {
         this.updateStats();
-        this.showNotification('📊 Dashboard updated', 'info');
+        this.showAlert('📊 Stats updated', 'info');
     }
 
     exportReport() {
         const report = {
-            system: "Premium Fraud Detection System",
+            system: "Fraud Detection System",
             exportDate: new Date().toISOString(),
             statistics: {
                 totalTransactions: this.transactions.length,
                 cleanTransactions: this.transactions.filter(t => t.status === 'clean').length,
-                suspiciousTransactions: this.transactions.filter(t => t.status === 'suspicious').length,
-                fraudRate: this.transactions.length > 0 ? 
-                    ((this.transactions.filter(t => t.status === 'suspicious').length / this.transactions.length) * 100).toFixed(1) : 0
+                suspiciousTransactions: this.transactions.filter(t => t.status === 'suspicious').length
             },
-            recentTransactions: this.transactions.slice(0, 10)
+            recentTransactions: this.transactions.slice(0, 5)
         };
         
         this.downloadJSON(report, `fraud-report-${new Date().toISOString().split('T')[0]}.json`);
-        this.showNotification('📈 Report exported successfully', 'success');
-    }
-
-    exportData() {
-        const data = {
-            transactions: this.transactions,
-            accounts: this.accounts,
-            exportDate: new Date().toISOString(),
-            system: "Premium Fraud Detection System"
-        };
-        
-        this.downloadJSON(data, `fraud-data-${new Date().toISOString().split('T')[0]}.json`);
-        this.showNotification('💾 Data exported successfully', 'success');
-    }
-
-    clearHistory() {
-        if (confirm('Are you sure you want to clear all transaction history? This cannot be undone.')) {
-            this.transactions = [];
-            if (CONFIG.FEATURES.LOCAL_STORAGE) {
-                localStorage.removeItem('premiumFraudTransactions');
-            }
-            this.loadTransactionHistory();
-            this.updateStats();
-            this.showNotification('🗑️ History cleared successfully', 'success');
-        }
+        this.showAlert('📈 Report exported successfully', 'success');
     }
 
     downloadJSON(data, filename) {
@@ -415,53 +318,75 @@ class PremiumFraudDetectionSystem {
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
 
-    showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type} notification`;
-        notification.innerHTML = `
-            <div class="alert-icon">${this.getNotificationIcon(type)}</div>
-            <div class="alert-content">${message}</div>
-        `;
-        
-        // Add to page
-        document.body.appendChild(notification);
-        
-        // Remove after 5 seconds
-        setTimeout(() => {
-            notification.remove();
-        }, 5000);
+    saveToLocalStorage() {
+        localStorage.setItem('fraudTransactions', JSON.stringify(this.transactions));
+        localStorage.setItem('fraudAccounts', JSON.stringify(this.accounts));
     }
 
-    getNotificationIcon(type) {
-        const icons = {
-            success: '✅',
-            danger: '🚨',
-            warning: '⚠️',
-            info: 'ℹ️'
+    showAlert(message, type = 'info') {
+        // Remove existing alerts
+        const existingAlerts = document.querySelectorAll('.custom-alert');
+        existingAlerts.forEach(alert => alert.remove());
+
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'custom-alert';
+        
+        const styles = {
+            info: 'background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8;',
+            success: 'background: #d4edda; color: #155724; border-left: 4px solid #28a745;',
+            warning: 'background: #fff3cd; color: #856404; border-left: 4px solid #ffc107;',
+            error: 'background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545;'
         };
-        return icons[type] || 'ℹ️';
-    }
 
-    displayError(message) {
-        const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = `
-            <div class="alert alert-danger">
-                <div class="alert-icon">❌</div>
-                <div class="alert-content">
-                    <div class="alert-title">Error</div>
-                    <div>${message}</div>
-                </div>
-            </div>
+        alertDiv.style = `
+            ${styles[type] || styles.info}
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 300px;
+            animation: slideIn 0.3s ease-out;
         `;
+
+        alertDiv.innerHTML = message;
+        document.body.appendChild(alertDiv);
+
+        // Remove after 4 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 4000);
     }
 }
 
-// Initialize premium system
-document.addEventListener('DOMContentLoaded', () => {
-    window.fraudSystem = new PremiumFraudDetectionSystem();
+// Add CSS for animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Initialize the system when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing system...');
+    window.fraudSystem = new FraudDetectionSystem();
 });
