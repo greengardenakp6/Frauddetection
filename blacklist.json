@@ -1,0 +1,17 @@
+{
+  "blacklistedAccounts": [201, 305, 409],
+  "blacklistedLocations": [
+    "Fraud Zone A",
+    "Suspicious City B",
+    "High Risk Region C"
+  ],
+  "blacklistedIPs": [
+    "192.168.1.100",
+    "10.0.0.50",
+    "172.16.254.1"
+  ],
+  "blacklistedMerchants": [
+    "Suspicious Store XYZ",
+    "Fraudulent Merchant ABC"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "fraudRules": {
+    "highValueThreshold": 50000.0,
+    "rapidTransactionCount": 3,
+    "rapidTransactionWindow": 60,
+    "impossibleTravelTime": 600,
+    "suspiciousLocations": [
+      "Unknown",
+      "High Risk Area",
+      "Restricted Region"
+    ],
+    "unusualHours": {
+      "start": "22:00",
+      "end": "06:00"
+    },
+    "amountPatterns": {
+      "roundAmounts": [1000, 5000, 10000, 50000, 100000],
+      "microAmounts": 1.0
+    }
+  },
+  "riskScores": {
+    "highValueMultiplier": 2.0,
+    "rapidTransactionMultiplier": 1.5,
+    "impossibleTravelMultiplier": 3.0,
+    "locationChangeMultiplier": 1.2,
+    "unusualHoursMultiplier": 1.3
+  }
+}
