@@ -126,7 +126,7 @@ app.post('/send-email-report', (req, res) => {
 
 // Serve the HTML file
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, '404.html'));
 });
 
 app.listen(PORT, () => {
