@@ -9,10 +9,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -40,12 +40,6 @@
             margin-bottom: 10px;
         }
 
-        header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-            margin-bottom: 10px;
-        }
-
         .header-badge {
             display: inline-block;
             background: rgba(255,255,255,0.2);
@@ -53,6 +47,7 @@
             border-radius: 50px;
             font-size: 0.9em;
             border: 1px solid rgba(255,255,255,0.3);
+            margin: 5px;
         }
 
         .transaction-form {
@@ -103,10 +98,6 @@
             color: #2c3e50;
         }
 
-        .input-group {
-            position: relative;
-        }
-
         input, select {
             width: 100%;
             padding: 12px 15px;
@@ -121,14 +112,6 @@
             outline: none;
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-
-        .input-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
         }
 
         .btn-group {
@@ -159,16 +142,6 @@
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
         }
 
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
-        }
-
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -193,26 +166,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .section-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            padding: 8px 16px;
-            border: 2px solid #e9ecef;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-
-        .action-btn:hover {
-            border-color: #3498db;
-            color: #3498db;
         }
 
         .stats-grid {
@@ -265,12 +218,6 @@
             }
         }
 
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border-left-color: #dc3545;
-        }
-
         .alert-warning {
             background: #fff3cd;
             color: #856404;
@@ -298,10 +245,9 @@
             padding: 20px;
             background: white;
             border-radius: 10px;
-            border-left: 4px solid;
+            border-left: 4px solid #3498db;
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
             transition: all 0.3s;
-            border-left-color: #3498db;
         }
 
         .transaction-item.suspicious {
@@ -424,9 +370,9 @@
         }
 
         .report-btn {
-            padding: 10px 15px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -453,7 +399,15 @@
 
         .report-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .contact-info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
         }
 
         @media (max-width: 768px) {
@@ -469,12 +423,6 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .section-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-            
             .report-actions {
                 flex-direction: column;
             }
@@ -485,8 +433,10 @@
     <div class="container">
         <header>
             <h1>🔍 Fraud Detection System</h1>
-            <p>Advanced AI-Powered Transaction Monitoring</p>
-            <div class="header-badge">PREMIUM SECURITY SUITE</div>
+            <p>Real-time Transaction Monitoring & Security</p>
+            <div class="header-badge">PDF READY</div>
+            <div class="header-badge">SMS: 9994247213</div>
+            <div class="header-badge">EMAIL: akash2402272@gmail.com</div>
         </header>
 
         <div class="transaction-form">
@@ -508,7 +458,6 @@
                                 <option value="103">103 - David Wilson (Standard)</option>
                                 <option value="104" selected>104 - Eva Brown (Premium)</option>
                             </select>
-                            <div class="input-icon">👤</div>
                         </div>
                     </div>
                     
@@ -516,7 +465,6 @@
                         <label for="amount">TRANSACTION AMOUNT ($)</label>
                         <div class="input-group">
                             <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" value="10000" required>
-                            <div class="input-icon">💰</div>
                         </div>
                     </div>
                 </div>
@@ -533,16 +481,17 @@
                             <option value="Sydney">🇦🇺 Sydney</option>
                             <option value="Dubai">🇦🇪 Dubai</option>
                         </select>
-                        <div class="input-icon">🌍</div>
                     </div>
+                </div>
+
+                <div class="contact-info">
+                    <strong>System Ready For:</strong><br>
+                    📱 SMS: 9994247213 | 📧 Email: akash2402272@gmail.com
                 </div>
 
                 <div class="btn-group">
                     <button type="submit" id="submitBtn" class="btn btn-primary">
                         <span>🔍 Analyze Transaction</span>
-                    </button>
-                    <button type="button" id="quickScan" class="btn btn-secondary">
-                        <span>⚡ Quick Security Scan</span>
                     </button>
                 </div>
             </form>
@@ -551,10 +500,6 @@
         <div class="results-container">
             <div class="section-header">
                 <h3 class="section-title">📊 Security Dashboard</h3>
-                <div class="section-actions">
-                    <button class="action-btn" id="exportReport">📈 Export Report</button>
-                    <button class="action-btn" id="refreshStats">🔄 Refresh</button>
-                </div>
             </div>
             
             <div class="stats-grid">
@@ -582,17 +527,13 @@
         <div class="history-container">
             <div class="section-header">
                 <h3 class="section-title">📋 Recent Transactions</h3>
-                <div class="section-actions">
-                    <button class="action-btn" id="clearHistory">🗑️ Clear</button>
-                    <button class="action-btn" id="exportData">💾 Export</button>
-                </div>
             </div>
             <div id="historyList" class="transaction-grid"></div>
         </div>
     </div>
 
     <script>
-        // Enhanced configuration
+        // Configuration
         const CONFIG = {
             accounts: [
                 { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
@@ -609,7 +550,7 @@
             }
         };
 
-        // COMPLETE WORKING FraudDetectionSystem class
+        // Fraud Detection System
         class FraudDetectionSystem {
             constructor() {
                 this.transactions = [];
@@ -618,7 +559,10 @@
             }
 
             init() {
-                console.log('Fraud Detection System Started');
+                console.log('🚀 System Initialized');
+                console.log('📱 SMS Ready for: 9994247213');
+                console.log('📧 Email Ready for: akash2402272@gmail.com');
+                
                 this.setupEventListeners();
                 this.loadTransactionHistory();
                 this.updateStats();
@@ -626,11 +570,6 @@
 
             setupEventListeners() {
                 document.getElementById('transactionForm').addEventListener('submit', (e) => this.handleTransaction(e));
-                document.getElementById('quickScan').addEventListener('click', () => this.quickSecurityScan());
-                document.getElementById('exportReport').addEventListener('click', () => this.exportReport());
-                document.getElementById('refreshStats').addEventListener('click', () => this.refreshStats());
-                document.getElementById('clearHistory').addEventListener('click', () => this.clearHistory());
-                document.getElementById('exportData').addEventListener('click', () => this.exportData());
             }
 
             handleTransaction(e) {
@@ -709,6 +648,7 @@
                 const alerts = [];
                 let riskScore = 0;
 
+                // High value checks
                 if (transaction.amount > CONFIG.thresholds.veryHighValue) {
                     alerts.push("Very high-value transaction");
                     riskScore += 50;
@@ -717,6 +657,7 @@
                     riskScore += 25;
                 }
 
+                // Rapid transactions check
                 const fiveMinutesAgo = Date.now() - (CONFIG.thresholds.rapidTransactionMinutes * 60 * 1000);
                 const recentTransactions = this.transactions.filter(t => 
                     t.accNo === transaction.accNo && 
@@ -728,6 +669,7 @@
                     riskScore += 30;
                 }
 
+                // Location change check
                 const lastTransaction = this.transactions.find(t => t.accNo === transaction.accNo);
                 if (lastTransaction && lastTransaction.location !== transaction.location) {
                     const farLocations = (lastTransaction.location === "Tokyo" && transaction.location === "New York") ||
@@ -741,6 +683,7 @@
                     }
                 }
 
+                // Round amount check
                 if (transaction.amount % 1000 === 0 && transaction.amount > 1000) {
                     alerts.push("Round amount transaction");
                     riskScore += 5;
@@ -773,13 +716,13 @@
                         
                         <div class="report-actions">
                             <button class="report-btn pdf" onclick="fraudSystem.generatePDFReport(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
-                                📄 Generate PDF Report
+                                📄 Download PDF Report
                             </button>
                             <button class="report-btn sms" onclick="fraudSystem.sendSMSAlert(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
                                 📱 Send SMS Alert
                             </button>
                             <button class="report-btn email" onclick="fraudSystem.sendEmailReport(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
-                                📧 Email Report
+                                📧 Send Email Report
                             </button>
                         </div>
                     </div>
@@ -796,130 +739,131 @@
                 resultsDiv.innerHTML = html;
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
+                // Auto-alert for high risk
                 if (riskScore >= 60) {
                     setTimeout(() => {
-                        if (confirm('🚨 High-risk transaction detected! Send SMS alert to security team?')) {
+                        if (confirm('🚨 High-risk transaction detected! Send SMS alert?')) {
                             this.sendSMSAlert(result.transaction);
                         }
                     }, 2000);
                 }
             }
 
-            // FIXED: PDF Generation that works without server
+            // REAL PDF Generation
             generatePDFReport(transactionData) {
                 try {
-                    console.log('📄 Generating PDF report...', transactionData);
+                    console.log('📄 Generating PDF for:', transactionData.id);
                     
-                    // Create PDF content
-                    const pdfContent = this.createPDFContent(transactionData);
+                    const params = new URLSearchParams({
+                        accNo: transactionData.accNo,
+                        transactionId: transactionData.id,
+                        amount: transactionData.amount,
+                        location: transactionData.location,
+                        riskScore: transactionData.riskScore,
+                        alerts: transactionData.alerts.join(',')
+                    });
+
+                    const url = `/generate-pdf-report?${params}`;
                     
-                    // Create and download text file (simulating PDF)
-                    const blob = new Blob([pdfContent], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `fraud-report-${transactionData.id}.txt`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
+                    this.showAlert('📄 Generating professional PDF report...', 'info');
                     
-                    this.showAlert('📄 PDF report downloaded successfully!', 'success');
+                    // Open PDF in new tab
+                    const newWindow = window.open(url, '_blank');
                     
-                    // Show preview
-                    setTimeout(() => {
-                        alert(`PDF REPORT PREVIEW:\n\n${pdfContent}\n\n✅ Report saved as fraud-report-${transactionData.id}.txt`);
-                    }, 1000);
+                    if (!newWindow) {
+                        this.showAlert('⚠️ Please allow pop-ups for PDF download', 'warning');
+                        window.location.href = url;
+                    }
                     
                 } catch (error) {
-                    console.error('PDF generation error:', error);
-                    this.showAlert('❌ Failed to generate PDF report', 'error');
+                    console.error('PDF error:', error);
+                    this.showAlert('❌ Failed to generate PDF', 'error');
                 }
             }
 
-            createPDFContent(transactionData) {
-                return `
-FRAUD DETECTION SYSTEM REPORT
-==============================
-
-Generated on: ${new Date().toLocaleString()}
-
-TRANSACTION DETAILS
--------------------
-Account Number: ${transactionData.accNo}
-Transaction ID: ${transactionData.id}
-Amount: $${transactionData.amount.toLocaleString()}
-Location: ${transactionData.location}
-Risk Score: ${transactionData.riskScore}%
-
-SECURITY ANALYSIS
------------------
-${transactionData.alerts.map(alert => `• ${alert}`).join('\n')}
-
-RISK ASSESSMENT
----------------
-Risk Level: ${transactionData.riskScore >= 60 ? 'HIGH' : transactionData.riskScore >= 30 ? 'MEDIUM' : 'LOW'}
-
-RECOMMENDATIONS
----------------
-${transactionData.riskScore >= 60 ? 
-    '• Immediate account review required\n• Contact account holder\n• Consider temporary account freeze' :
-    transactionData.riskScore >= 30 ?
-    '• Monitor account activity\n• Verify recent transactions' :
-    '• Continue normal monitoring'
-}
-
----
-Generated by Advanced Fraud Detection System
-Confidential Report - For authorized personnel only
-                `.trim();
-            }
-
-            // FIXED: SMS Alert that works without server
-            sendSMSAlert(transactionData) {
+            // REAL SMS Alert
+            async sendSMSAlert(transactionData) {
                 try {
-                    const phoneNumber = prompt('Enter phone number for SMS alert:', '1234567890');
+                    const phoneNumber = prompt('Enter phone number for SMS alert:', '9994247213');
                     if (!phoneNumber) {
                         this.showAlert('SMS alert cancelled', 'info');
                         return;
                     }
 
-                    const message = `🚨 Fraud Alert: Transaction $${transactionData.amount} at ${transactionData.location}. Risk: ${transactionData.riskScore}%. Check your account.`;
+                    const message = `🚨 FRAUD ALERT\nAcct: ${transactionData.accNo}\nAmt: $${transactionData.amount}\nLoc: ${transactionData.location}\nRisk: ${transactionData.riskScore}%\nTime: ${new Date().toLocaleTimeString()}\nReview immediately.`;
 
-                    // Simulate SMS sending (no server needed)
-                    this.showAlert('📱 SMS alert sent successfully!', 'success');
+                    this.showAlert('📱 Sending SMS alert...', 'info');
+
+                    const response = await fetch('/send-sms-alert', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            phoneNumber: phoneNumber,
+                            message: message,
+                            transactionDetails: transactionData
+                        })
+                    });
+
+                    const data = await response.json();
                     
-                    // Show demo message
-                    setTimeout(() => {
-                        alert(`SMS DEMONSTRATION:\n\nTo: ${phoneNumber}\n\nMessage: ${message}\n\n✅ In a real system, this would be sent via Twilio API`);
-                    }, 1000);
+                    if (data.success) {
+                        this.showAlert('✅ SMS ready for delivery!', 'success');
+                        
+                        setTimeout(() => {
+                            alert(`✅ SMS READY FOR DELIVERY\n\nTo: ${phoneNumber}\n\nMessage: ${message}\n\nStatus: Would be sent via SMS gateway`);
+                        }, 1000);
+                        
+                    } else {
+                        this.showAlert('❌ SMS failed: ' + (data.error || 'Unknown error'), 'error');
+                    }
                     
                 } catch (error) {
                     console.error('SMS error:', error);
-                    this.showAlert('❌ Failed to send SMS alert', 'error');
+                    this.showAlert('❌ SMS service error', 'error');
                 }
             }
 
-            // FIXED: Email Report that works without server
-            sendEmailReport(transactionData) {
+            // REAL Email Report
+            async sendEmailReport(transactionData) {
                 try {
-                    const email = prompt('Enter email address for report:', 'security@company.com');
+                    const email = prompt('Enter email address for report:', 'akash2402272@gmail.com');
                     if (!email) {
                         this.showAlert('Email report cancelled', 'info');
                         return;
                     }
 
-                    // Simulate email sending (no server needed)
-                    this.showAlert('📧 Email report sent successfully!', 'success');
+                    this.showAlert('📧 Sending email report...', 'info');
+
+                    const response = await fetch('/send-email-report', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            subject: `🚨 Fraud Alert - Transaction ${transactionData.id}`,
+                            reportData: transactionData
+                        })
+                    });
+
+                    const data = await response.json();
                     
-                    // Show demo message
-                    setTimeout(() => {
-                        alert(`EMAIL DEMONSTRATION:\n\nTo: ${email}\nSubject: Fraud Detection Report - Transaction ${transactionData.id}\n\nTransaction Details:\n- Amount: $${transactionData.amount}\n- Location: ${transactionData.location}\n- Risk Score: ${transactionData.riskScore}%\n- Alerts: ${transactionData.alerts.join(', ')}\n\n✅ In a real system, this would be sent via Nodemailer`);
-                    }, 1000);
+                    if (data.success) {
+                        this.showAlert('✅ Email ready for delivery!', 'success');
+                        
+                        setTimeout(() => {
+                            alert(`✅ EMAIL READY FOR DELIVERY\n\nTo: ${email}\n\nSubject: Fraud Alert Report\n\nStatus: Would be sent via SMTP server\n\nProfessional HTML email with full details`);
+                        }, 1000);
+                        
+                    } else {
+                        this.showAlert('❌ Email failed: ' + (data.error || 'Unknown error'), 'error');
+                    }
                     
                 } catch (error) {
                     console.error('Email error:', error);
-                    this.showAlert('❌ Failed to send email report', 'error');
+                    this.showAlert('❌ Email service error', 'error');
                 }
             }
 
@@ -965,10 +909,10 @@ Confidential Report - For authorized personnel only
                             </div>
                         ` : ''}
                         <div class="report-actions" style="margin-top: 10px;">
-                            <button class="report-btn pdf" onclick="fraudSystem.generatePDFReport(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
+                            <button class="report-btn pdf" onclick="fraudSystem.generatePDFReport(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 8px 12px; font-size: 12px;">
                                 📄 PDF
                             </button>
-                            <button class="report-btn sms" onclick="fraudSystem.sendSMSAlert(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
+                            <button class="report-btn sms" onclick="fraudSystem.sendSMSAlert(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 8px 12px; font-size: 12px;">
                                 📱 SMS
                             </button>
                         </div>
@@ -988,83 +932,12 @@ Confidential Report - For authorized personnel only
                 document.getElementById('fraudRate').textContent = fraudRate + '%';
             }
 
-            quickSecurityScan() {
-                this.showAlert('🔍 Running security scan...', 'info');
-                
-                setTimeout(() => {
-                    const threats = Math.random() > 0.8 ? ['Unusual pattern detected'] : [];
-                    
-                    if (threats.length > 0) {
-                        this.showAlert('🚨 Security threats detected!', 'warning');
-                    } else {
-                        this.showAlert('✅ System secure - No threats found', 'success');
-                    }
-                }, 2000);
-            }
-
-            refreshStats() {
-                this.updateStats();
-                this.showAlert('📊 Stats updated', 'info');
-            }
-
-            exportReport() {
-                const report = {
-                    system: "Fraud Detection System",
-                    exportDate: new Date().toISOString(),
-                    statistics: {
-                        totalTransactions: this.transactions.length,
-                        cleanTransactions: this.transactions.filter(t => t.status === 'clean').length,
-                        suspiciousTransactions: this.transactions.filter(t => t.status === 'suspicious').length,
-                        fraudRate: this.transactions.length > 0 ? 
-                            ((this.transactions.filter(t => t.status === 'suspicious').length / this.transactions.length) * 100).toFixed(1) : 0
-                    },
-                    recentTransactions: this.transactions.slice(0, 5)
-                };
-                
-                this.downloadJSON(report, `fraud-report-${new Date().toISOString().split('T')[0]}.json`);
-                this.showAlert('📈 Report exported successfully', 'success');
-            }
-
-            exportData() {
-                const data = {
-                    transactions: this.transactions,
-                    accounts: this.accounts,
-                    exportDate: new Date().toISOString(),
-                    system: "Fraud Detection System"
-                };
-                
-                this.downloadJSON(data, `fraud-data-${new Date().toISOString().split('T')[0]}.json`);
-                this.showAlert('💾 Data exported successfully', 'success');
-            }
-
-            clearHistory() {
-                if (confirm('Are you sure you want to clear all transaction history? This cannot be undone.')) {
-                    this.transactions = [];
-                    localStorage.removeItem('fraudTransactions');
-                    this.loadTransactionHistory();
-                    this.updateStats();
-                    this.showAlert('🗑️ History cleared successfully', 'success');
-                }
-            }
-
-            downloadJSON(data, filename) {
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-
             saveToLocalStorage() {
                 localStorage.setItem('fraudTransactions', JSON.stringify(this.transactions));
-                localStorage.setItem('fraudAccounts', JSON.stringify(this.accounts));
             }
 
             showAlert(message, type = 'info') {
+                // Remove existing alerts
                 const existingAlerts = document.querySelectorAll('.notification');
                 existingAlerts.forEach(alert => alert.remove());
 
@@ -1090,8 +963,9 @@ Confidential Report - For authorized personnel only
             }
         }
 
+        // Initialize the system
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing system...');
+            console.log('🚀 Starting Fraud Detection System...');
             window.fraudSystem = new FraudDetectionSystem();
         });
     </script>
