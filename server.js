@@ -1,5 +1,6 @@
 const express = require('express');
 const PDFDocument = require('pdfkit');
+const fs = require('fs');
 const path = require('path');
 
 const app = express();
@@ -7,13 +8,22 @@ const PORT = 3000;
 
 // Middleware
 app.use(express.json());
-app.use(express.static('.')); // Serve current directory
+app.use(express.urlencoded({ extended: true }));
 
-// PDF Generation Endpoint
+// Serve static files from current directory
+app.use(express.static(__dirname));
+
+// Store transactions (in production, use a database)
+let transactions = [];
+
+// PDF Generation Endpoint - FIXED
 app.get('/generate-pdf-report', (req, res) => {
     try {
+        console.log('📄 Generating PDF report...', req.query);
+        
         const { accNo, transactionId, amount, location, riskScore, alerts } = req.query;
         
+        // Create a PDF document
         const doc = new PDFDocument();
         
         // Set response headers
@@ -24,111 +34,218 @@ app.get('/generate-pdf-report', (req, res) => {
         doc.pipe(res);
         
         // Add content to PDF
+        // Header
         doc.fillColor('#2c3e50')
            .fontSize(20)
-           .text('FRAUD DETECTION SYSTEM REPORT', 100, 100, { align: 'center' });
+           .text('FRAUD DETECTION SYSTEM REPORT', 50, 50, { align: 'center', width: 500 });
         
         doc.fillColor('#666')
            .fontSize(12)
-           .text(`Generated on: ${new Date().toLocaleString()}`, 100, 130, { align: 'center' });
+           .text(`Generated on: ${new Date().toLocaleString()}`, 50, 80, { align: 'center', width: 500 });
         
         // Transaction Details
         doc.fillColor('#2c3e50')
            .fontSize(16)
-           .text('TRANSACTION DETAILS', 100, 180);
+           .text('TRANSACTION DETAILS', 50, 120);
         
         doc.fillColor('#333')
            .fontSize(12)
-           .text(`Account Number: ${accNo}`, 100, 210)
-           .text(`Transaction ID: ${transactionId}`, 100, 230)
-           .text(`Amount: $${parseFloat(amount).toLocaleString()}`, 100, 250)
-           .text(`Location: ${location}`, 100, 270)
-           .text(`Risk Score: ${riskScore}%`, 100, 290);
+           .text(`Account Number: ${accNo || 'N/A'}`, 50, 150)
+           .text(`Transaction ID: ${transactionId || 'N/A'}`, 50, 170)
+           .text(`Amount: $${amount ? parseFloat(amount).toLocaleString() : 'N/A'}`, 50, 190)
+           .text(`Location: ${location || 'N/A'}`, 50, 210)
+           .text(`Risk Score: ${riskScore || '0'}%`, 50, 230);
         
         // Security Analysis
         doc.fillColor('#2c3e50')
            .fontSize(16)
-           .text('SECURITY ANALYSIS', 100, 330);
+           .text('SECURITY ANALYSIS', 50, 270);
         
-        let yPosition = 360;
+        let yPosition = 300;
         if (alerts && alerts.length > 0) {
-            alerts.split(',').forEach(alert => {
+            const alertList = alerts.split(',');
+            alertList.forEach(alert => {
+                if (yPosition > 700) {
+                    doc.addPage();
+                    yPosition = 50;
+                }
                 doc.fillColor('#e74c3c')
                    .fontSize(11)
-                   .text(`• ${alert.trim()}`, 120, yPosition);
+                   .text(`• ${alert.trim()}`, 70, yPosition);
                 yPosition += 20;
             });
         } else {
             doc.fillColor('#27ae60')
                .fontSize(11)
-               .text('• No security threats detected', 120, yPosition);
+               .text('• No security threats detected', 70, yPosition);
+            yPosition += 20;
+        }
+        
+        // Risk Assessment
+        doc.fillColor('#2c3e50')
+           .fontSize(16)
+           .text('RISK ASSESSMENT', 50, yPosition + 20);
+        
+        const riskLevel = parseInt(riskScore) >= 60 ? 'HIGH' : 
+                         parseInt(riskScore) >= 30 ? 'MEDIUM' : 'LOW';
+        
+        const riskColor = parseInt(riskScore) >= 60 ? '#e74c3c' : 
+                         parseInt(riskScore) >= 30 ? '#f39c12' : '#27ae60';
+        
+        doc.fillColor(riskColor)
+           .fontSize(14)
+           .text(`Risk Level: ${riskLevel}`, 50, yPosition + 50);
+        
+        // Recommendations
+        doc.fillColor('#2c3e50')
+           .fontSize(16)
+           .text('RECOMMENDATIONS', 50, yPosition + 90);
+        
+        if (parseInt(riskScore) >= 60) {
+            doc.fillColor('#e74c3c')
+               .fontSize(11)
+               .text('• Immediate account review required', 70, yPosition + 120)
+               .text('• Contact account holder', 70, yPosition + 140)
+               .text('• Consider temporary account freeze', 70, yPosition + 160);
+        } else if (parseInt(riskScore) >= 30) {
+            doc.fillColor('#f39c12')
+               .fontSize(11)
+               .text('• Monitor account activity', 70, yPosition + 120)
+               .text('• Verify recent transactions', 70, yPosition + 140);
+        } else {
+            doc.fillColor('#27ae60')
+               .fontSize(11)
+               .text('• Continue normal monitoring', 70, yPosition + 120);
         }
         
         // Footer
         doc.fillColor('#999')
            .fontSize(10)
            .text('Generated by Advanced Fraud Detection System - Confidential Report', 
-                 100, 750, { align: 'center' });
+                 50, 750, { align: 'center', width: 500 });
         
         doc.end();
         
+        console.log('✅ PDF generated successfully');
+        
     } catch (error) {
-        console.error('PDF generation error:', error);
+        console.error('❌ PDF generation error:', error);
         res.status(500).json({ error: 'Failed to generate PDF' });
     }
 });
 
-// SMS Alert Endpoint (Simulated)
+// SMS Alert Endpoint - FIXED
 app.post('/send-sms-alert', (req, res) => {
     try {
+        console.log('📱 Processing SMS alert...', req.body);
+        
         const { phoneNumber, message, transactionDetails } = req.body;
         
-        console.log('📱 SMS Alert Details:');
-        console.log('To:', phoneNumber);
-        console.log('Message:', message);
-        console.log('Transaction:', transactionDetails);
+        if (!phoneNumber) {
+            return res.status(400).json({ error: 'Phone number is required' });
+        }
         
-        // Simulate SMS sending
+        // In a real application, you would integrate with:
+        // - Twilio (for actual SMS)
+        // - AWS SNS
+        // - Other SMS gateway
+        
+        console.log('=== SMS ALERT SIMULATION ===');
+        console.log('📱 To:', phoneNumber);
+        console.log('💬 Message:', message);
+        console.log('💳 Transaction:', transactionDetails);
+        console.log('=== END SMS SIMULATION ===');
+        
+        // Simulate successful SMS sending
         res.json({
             success: true,
             message: `SMS alert sent to ${phoneNumber}`,
             timestamp: new Date().toISOString(),
-            simulated: true
+            simulated: true,
+            alertDetails: {
+                phoneNumber: phoneNumber,
+                message: message,
+                transactionId: transactionDetails?.id,
+                riskScore: transactionDetails?.riskScore
+            }
         });
         
     } catch (error) {
-        console.error('SMS sending error:', error);
-        res.status(500).json({ error: 'Failed to send SMS' });
+        console.error('❌ SMS sending error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to send SMS alert',
+            details: error.message 
+        });
     }
 });
 
-// Email Report Endpoint (Simulated)
+// Email Report Endpoint - FIXED
 app.post('/send-email-report', (req, res) => {
     try {
+        console.log('📧 Processing email report...', req.body);
+        
         const { email, subject, reportData } = req.body;
         
-        console.log('📧 Email Alert:');
-        console.log('To:', email);
-        console.log('Subject:', subject);
-        console.log('Report Data:', reportData);
+        if (!email) {
+            return res.status(400).json({ error: 'Email address is required' });
+        }
         
+        console.log('=== EMAIL REPORT SIMULATION ===');
+        console.log('📧 To:', email);
+        console.log('📋 Subject:', subject);
+        console.log('📊 Report Data:', reportData);
+        console.log('=== END EMAIL SIMULATION ===');
+        
+        // Simulate successful email sending
         res.json({
             success: true,
-            message: `Report sent to ${email}`,
-            timestamp: new Date().toISOString()
+            message: `Email report sent to ${email}`,
+            timestamp: new Date().toISOString(),
+            simulated: true,
+            reportDetails: {
+                email: email,
+                subject: subject,
+                transactionId: reportData?.id,
+                riskScore: reportData?.riskScore,
+                alerts: reportData?.alerts
+            }
         });
         
     } catch (error) {
-        console.error('Email sending error:', error);
-        res.status(500).json({ error: 'Failed to send email' });
+        console.error('❌ Email sending error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to send email report',
+            details: error.message 
+        });
     }
 });
 
-// Serve the HTML file
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        service: 'Fraud Detection System',
+        timestamp: new Date().toISOString(),
+        features: {
+            pdf: 'active',
+            sms: 'simulated',
+            email: 'simulated'
+        }
+    });
+});
+
+// Serve the main HTML file
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '404.html'));
 });
 
+// Start server
 app.listen(PORT, () => {
     console.log(`🚀 Fraud Detection System running on http://localhost:${PORT}`);
+    console.log(`📄 PDF Reports: http://localhost:${PORT}/generate-pdf-report`);
+    console.log(`📱 SMS Alerts: http://localhost:${PORT}/send-sms-alert`);
+    console.log(`📧 Email Reports: http://localhost:${PORT}/send-email-report`);
+    console.log(`❤️  Health Check: http://localhost:${PORT}/health`);
 });
