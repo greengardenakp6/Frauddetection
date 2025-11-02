@@ -878,7 +878,7 @@ Confidential Report - For authorized personnel only
             // FIXED: SMS Alert that works without server
             sendSMSAlert(transactionData) {
                 try {
-                    const phoneNumber = prompt('Enter phone number for SMS alert:', '+1234567890');
+                    const phoneNumber = prompt('Enter phone number for SMS alert:', '1234567890');
                     if (!phoneNumber) {
                         this.showAlert('SMS alert cancelled', 'info');
                         return;
