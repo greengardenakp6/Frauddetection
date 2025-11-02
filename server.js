@@ -5,25 +5,25 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-
+// Middleware
 app.use(express.json());
-app.use(express.static('.')); 
+app.use(express.static('.')); // Serve current directory
 
-
+// PDF Generation Endpoint
 app.get('/generate-pdf-report', (req, res) => {
     try {
         const { accNo, transactionId, amount, location, riskScore, alerts } = req.query;
         
         const doc = new PDFDocument();
         
-        
+        // Set response headers
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=fraud-report-${transactionId}.pdf`);
         
-        
+        // Pipe PDF to response
         doc.pipe(res);
         
-      
+        // Add content to PDF
         doc.fillColor('#2c3e50')
            .fontSize(20)
            .text('FRAUD DETECTION SYSTEM REPORT', 100, 100, { align: 'center' });
@@ -32,7 +32,7 @@ app.get('/generate-pdf-report', (req, res) => {
            .fontSize(12)
            .text(`Generated on: ${new Date().toLocaleString()}`, 100, 130, { align: 'center' });
         
-        
+        // Transaction Details
         doc.fillColor('#2c3e50')
            .fontSize(16)
            .text('TRANSACTION DETAILS', 100, 180);
@@ -45,7 +45,7 @@ app.get('/generate-pdf-report', (req, res) => {
            .text(`Location: ${location}`, 100, 270)
            .text(`Risk Score: ${riskScore}%`, 100, 290);
         
-        
+        // Security Analysis
         doc.fillColor('#2c3e50')
            .fontSize(16)
            .text('SECURITY ANALYSIS', 100, 330);
@@ -78,7 +78,7 @@ app.get('/generate-pdf-report', (req, res) => {
     }
 });
 
-
+// SMS Alert Endpoint (Simulated)
 app.post('/send-sms-alert', (req, res) => {
     try {
         const { phoneNumber, message, transactionDetails } = req.body;
@@ -87,7 +87,8 @@ app.post('/send-sms-alert', (req, res) => {
         console.log('To:', phoneNumber);
         console.log('Message:', message);
         console.log('Transaction:', transactionDetails);
-       
+        
+        // Simulate SMS sending
         res.json({
             success: true,
             message: `SMS alert sent to ${phoneNumber}`,
@@ -101,7 +102,7 @@ app.post('/send-sms-alert', (req, res) => {
     }
 });
 
-
+// Email Report Endpoint (Simulated)
 app.post('/send-email-report', (req, res) => {
     try {
         const { email, subject, reportData } = req.body;
@@ -123,9 +124,9 @@ app.post('/send-email-report', (req, res) => {
     }
 });
 
-
+// Serve the HTML file
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '404.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
