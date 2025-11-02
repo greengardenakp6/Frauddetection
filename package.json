@@ -1,13 +1,16 @@
 {
   "name": "fraud-detection-system",
   "version": "1.0.0",
-  "description": "Complete Fraud Detection System with PDF and SMS",
+  "description": "Real Fraud Detection System with PDF and SMS",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.0",
-    "pdfkit": "^0.14.0"
+    "pdfkit": "^0.14.0",
+    "twilio": "^4.0.0",
+    "nodemailer": "^6.9.0",
+    "cors": "^2.8.5"
   }
 }
