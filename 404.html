@@ -836,7 +836,7 @@
 
           
             sendSMSAlert(transactionData) {
-                const phoneNumber = prompt('Enter phone number for SMS alert:', '+1234567890');
+                const phoneNumber = prompt('Enter phone number for SMS alert:', '1234567890');
                 if (!phoneNumber) return;
 
                 const message = `🚨 Fraud Alert: Transaction $${transactionData.amount} at ${transactionData.location}. Risk: ${transactionData.riskScore}%. Check your account.`;
@@ -1080,6 +1080,184 @@
             console.log('DOM loaded, initializing system...');
             window.fraudSystem = new FraudDetectionSystem();
         });
+       
+class FraudDetectionSystem {
+   
+    generatePDFReport(transactionData) {
+        try {
+            console.log('📄 Starting PDF generation...', transactionData);
+            
+            const params = new URLSearchParams({
+                accNo: transactionData.accNo || 'N/A',
+                transactionId: transactionData.id || Date.now(),
+                amount: transactionData.amount || 0,
+                location: transactionData.location || 'Unknown',
+                riskScore: transactionData.riskScore || 0,
+                alerts: (transactionData.alerts || ['No alerts']).join(',')
+            });
+
+            const url = `/generate-pdf-report?${params}`;
+            console.log('PDF URL:', url);
+            
+            // Open in new tab
+            const newWindow = window.open(url, '_blank');
+            
+            if (!newWindow) {
+                this.showAlert('⚠️ Please allow pop-ups for PDF generation', 'warning');
+                // Fallback: open in same window
+                window.location.href = url;
+            }
+            
+            this.showAlert('📄 PDF report generation started...', 'info');
+            
+        } catch (error) {
+            console.error('PDF generation error:', error);
+            this.showAlert('❌ Failed to generate PDF: ' + error.message, 'error');
+        }
+    }
+
+    // ENHANCED: SMS Alert with proper error handling
+    async sendSMSAlert(transactionData) {
+        try {
+            const phoneNumber = prompt('Enter phone number for SMS alert:', '+1234567890');
+            if (!phoneNumber) {
+                this.showAlert('SMS alert cancelled', 'info');
+                return;
+            }
+
+            // Validate phone number
+            if (!phoneNumber.match(/^\+?[\d\s\-\(\)]{10,}$/)) {
+                this.showAlert('❌ Please enter a valid phone number', 'error');
+                return;
+            }
+
+            const message = `🚨 Fraud Alert: Transaction $${transactionData.amount} at ${transactionData.location}. Risk: ${transactionData.riskScore}%. Check your account.`;
+
+            this.showAlert('📱 Sending SMS alert...', 'info');
+
+            const response = await fetch('/send-sms-alert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phoneNumber: phoneNumber,
+                    message: message,
+                    transactionDetails: transactionData
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showAlert('✅ SMS alert sent successfully!', 'success');
+                console.log('SMS Details:', data);
+                
+                // Show demo message
+                setTimeout(() => {
+                    alert(`DEMO SMS CONTENT:\n\nTo: ${phoneNumber}\n\nMessage: ${message}\n\n(In production, this would be sent via Twilio)`);
+                }, 1000);
+                
+            } else {
+                this.showAlert('❌ Failed to send SMS: ' + (data.error || 'Unknown error'), 'error');
+            }
+            
+        } catch (error) {
+            console.error('SMS error:', error);
+            this.showAlert('❌ SMS service unavailable. Running in demo mode.', 'warning');
+            
+            // Demo fallback
+            setTimeout(() => {
+                alert(`DEMO MODE: SMS would be sent:\n\nTo: ${phoneNumber}\nMessage: ${message}`);
+            }, 500);
+        }
+    }
+
+    // ENHANCED: Email Report with proper error handling
+    async sendEmailReport(transactionData) {
+        try {
+            const email = prompt('Enter email address for report:', 'security@company.com');
+            if (!email) {
+                this.showAlert('Email report cancelled', 'info');
+                return;
+            }
+
+            // Validate email
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                this.showAlert('❌ Please enter a valid email address', 'error');
+                return;
+            }
+
+            this.showAlert('📧 Sending email report...', 'info');
+
+            const response = await fetch('/send-email-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    subject: `Fraud Detection Report - Transaction ${transactionData.id}`,
+                    reportData: transactionData
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showAlert('✅ Email report sent successfully!', 'success');
+                console.log('Email Details:', data);
+                
+                // Show demo message
+                setTimeout(() => {
+                    alert(`DEMO EMAIL CONTENT:\n\nTo: ${email}\n\nSubject: Fraud Detection Report\n\nTransaction: $${transactionData.amount} at ${transactionData.location}\nRisk Score: ${transactionData.riskScore}%\n\n(In production, this would be sent via Nodemailer)`);
+                }, 1000);
+                
+            } else {
+                this.showAlert('❌ Failed to send email: ' + (data.error || 'Unknown error'), 'error');
+            }
+            
+        } catch (error) {
+            console.error('Email error:', error);
+            this.showAlert('❌ Email service unavailable. Running in demo mode.', 'warning');
+            
+            // Demo fallback
+            setTimeout(() => {
+                alert(`DEMO MODE: Email would be sent to: ${email}`);
+            }, 500);
+        }
+    }
+
+    // ENHANCED displayResults method
+    displayResults(result) {
+        const resultsDiv = document.getElementById('results');
+        const riskScore = result.transaction.riskScore;
+        const riskLevel = riskScore >= 60 ? 'high' : riskScore >= 30 ? 'medium' : 'low';
+        
+        let html = `
+            <div class="alert alert-success">
+                <h3>✅ Transaction Successful</h3>
+                <p><strong>Transaction ID:</strong> ${result.transaction.id}</p>
+                <p><strong>Remaining Balance:</strong> $${result.remainingBalance.toLocaleString()}</p>
+                <p><strong>Risk Score:</strong> ${riskScore}% (${riskLevel} risk)</p>
+                
+                <div class="report-actions">
+                    <button class="report-btn pdf" onclick="fraudSystem.generatePDFReport(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
+                        📄 Download PDF Report
+                    </button>
+                    <button class="report-btn sms" onclick="fraudSystem.sendSMSAlert(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
+                        📱 Send SMS Alert
+                    </button>
+                    <button class="report-btn email" onclick="fraudSystem.sendEmailReport(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
+                        📧 Email Report
+                    </button>
+                </div>
+            </div>
+        `;
+
+        
+    }
+}
     </script>
 </body>
 </html>
