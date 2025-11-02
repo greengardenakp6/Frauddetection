@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fraud Detection System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -479,6 +480,75 @@
                 flex-direction: column;
             }
         }
+
+        /* Email Configuration Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .config-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .config-note {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #6c757d;
+            border-left: 4px solid #3498db;
+        }
+
+        .config-note a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .config-note a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -554,6 +624,7 @@
                 <div class="section-actions">
                     <button class="action-btn" id="exportReport">📈 Export Report</button>
                     <button class="action-btn" id="refreshStats">🔄 Refresh</button>
+                    <button class="action-btn" id="configureEmail">📧 Configure Email</button>
                 </div>
             </div>
             
@@ -591,6 +662,52 @@
         </div>
     </div>
 
+    <!-- Email Configuration Modal -->
+    <div id="emailConfigModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">📧 Email Configuration</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="config-form">
+                <div class="config-note">
+                    <p><strong>To use EmailJS:</strong></p>
+                    <ol>
+                        <li>Create a free account at <a href="https://www.emailjs.com" target="_blank">EmailJS.com</a></li>
+                        <li>Add an email service (Gmail, Outlook, etc.)</li>
+                        <li>Create an email template</li>
+                        <li>Copy your credentials below</li>
+                    </ol>
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailjsPublicKey">EmailJS Public Key</label>
+                    <input type="text" id="emailjsPublicKey" placeholder="Enter your EmailJS Public Key">
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailjsServiceId">EmailJS Service ID</label>
+                    <input type="text" id="emailjsServiceId" placeholder="Enter your EmailJS Service ID">
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailjsTemplateId">EmailJS Template ID</label>
+                    <input type="text" id="emailjsTemplateId" placeholder="Enter your EmailJS Template ID">
+                </div>
+                
+                <div class="form-group">
+                    <label for="defaultRecipient">Default Recipient Email</label>
+                    <input type="email" id="defaultRecipient" placeholder="security@company.com">
+                </div>
+                
+                <div class="btn-group">
+                    <button type="button" id="saveEmailConfig" class="btn btn-primary">Save Configuration</button>
+                    <button type="button" id="testEmailConfig" class="btn btn-secondary">Test Configuration</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Enhanced configuration
         const CONFIG = {
@@ -609,16 +726,23 @@
             }
         };
 
-        // COMPLETE WORKING FraudDetectionSystem class
+        // COMPLETE WORKING FraudDetectionSystem class with EmailJS integration
         class FraudDetectionSystem {
             constructor() {
                 this.transactions = [];
                 this.accounts = JSON.parse(JSON.stringify(CONFIG.accounts));
+                this.emailConfig = {
+                    publicKey: '',
+                    serviceId: '',
+                    templateId: '',
+                    defaultRecipient: ''
+                };
                 this.init();
             }
 
             init() {
                 console.log('Fraud Detection System Started');
+                this.loadEmailConfig();
                 this.setupEventListeners();
                 this.loadTransactionHistory();
                 this.updateStats();
@@ -631,6 +755,58 @@
                 document.getElementById('refreshStats').addEventListener('click', () => this.refreshStats());
                 document.getElementById('clearHistory').addEventListener('click', () => this.clearHistory());
                 document.getElementById('exportData').addEventListener('click', () => this.exportData());
+                document.getElementById('configureEmail').addEventListener('click', () => this.showEmailConfigModal());
+                document.getElementById('closeModal').addEventListener('click', () => this.hideEmailConfigModal());
+                document.getElementById('saveEmailConfig').addEventListener('click', () => this.saveEmailConfig());
+                document.getElementById('testEmailConfig').addEventListener('click', () => this.testEmailConfig());
+                
+                // Close modal when clicking outside
+                document.getElementById('emailConfigModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'emailConfigModal') {
+                        this.hideEmailConfigModal();
+                    }
+                });
+            }
+
+            loadEmailConfig() {
+                const savedConfig = localStorage.getItem('fraudEmailConfig');
+                if (savedConfig) {
+                    this.emailConfig = JSON.parse(savedConfig);
+                    this.initializeEmailJS();
+                }
+            }
+
+            saveEmailConfig() {
+                this.emailConfig = {
+                    publicKey: document.getElementById('emailjsPublicKey').value,
+                    serviceId: document.getElementById('emailjsServiceId').value,
+                    templateId: document.getElementById('emailjsTemplateId').value,
+                    defaultRecipient: document.getElementById('defaultRecipient').value
+                };
+                
+                localStorage.setItem('fraudEmailConfig', JSON.stringify(this.emailConfig));
+                this.initializeEmailJS();
+                this.hideEmailConfigModal();
+                this.showAlert('✅ Email configuration saved successfully!', 'success');
+            }
+
+            initializeEmailJS() {
+                if (this.emailConfig.publicKey) {
+                    emailjs.init(this.emailConfig.publicKey);
+                    console.log('EmailJS initialized with public key:', this.emailConfig.publicKey);
+                }
+            }
+
+            showEmailConfigModal() {
+                document.getElementById('emailjsPublicKey').value = this.emailConfig.publicKey || '';
+                document.getElementById('emailjsServiceId').value = this.emailConfig.serviceId || '';
+                document.getElementById('emailjsTemplateId').value = this.emailConfig.templateId || '';
+                document.getElementById('defaultRecipient').value = this.emailConfig.defaultRecipient || '';
+                document.getElementById('emailConfigModal').style.display = 'flex';
+            }
+
+            hideEmailConfigModal() {
+                document.getElementById('emailConfigModal').style.display = 'none';
             }
 
             handleTransaction(e) {
@@ -900,26 +1076,107 @@ Confidential Report - For authorized personnel only
                 }
             }
 
-            // FIXED: Email Report that works without server
+            // ENHANCED: Email Report with EmailJS integration
             sendEmailReport(transactionData) {
                 try {
-                    const email = prompt('Enter email address for report:', 'security@company.com');
-                    if (!email) {
+                    // Check if EmailJS is configured
+                    if (!this.emailConfig.publicKey || !this.emailConfig.serviceId || !this.emailConfig.templateId) {
+                        this.showEmailConfigModal();
+                        this.showAlert('Please configure EmailJS first', 'warning');
+                        return;
+                    }
+
+                    const recipient = prompt('Enter recipient email address:', this.emailConfig.defaultRecipient || 'security@company.com');
+                    if (!recipient) {
                         this.showAlert('Email report cancelled', 'info');
                         return;
                     }
 
-                    // Simulate email sending (no server needed)
-                    this.showAlert('📧 Email report sent successfully!', 'success');
-                    
-                    // Show demo message
-                    setTimeout(() => {
-                        alert(`EMAIL DEMONSTRATION:\n\nTo: ${email}\nSubject: Fraud Detection Report - Transaction ${transactionData.id}\n\nTransaction Details:\n- Amount: $${transactionData.amount}\n- Location: ${transactionData.location}\n- Risk Score: ${transactionData.riskScore}%\n- Alerts: ${transactionData.alerts.join(', ')}\n\n✅ In a real system, this would be sent via Nodemailer`);
-                    }, 1000);
+                    // Prepare email parameters
+                    const templateParams = {
+                        to_email: recipient,
+                        transaction_id: transactionData.id,
+                        account_number: transactionData.accNo,
+                        amount: transactionData.amount.toLocaleString(),
+                        location: transactionData.location,
+                        risk_score: transactionData.riskScore,
+                        risk_level: transactionData.riskScore >= 60 ? 'HIGH' : transactionData.riskScore >= 30 ? 'MEDIUM' : 'LOW',
+                        alerts: transactionData.alerts.join(', '),
+                        timestamp: transactionData.timestamp,
+                        status: transactionData.status
+                    };
+
+                    // Show loading state
+                    this.showAlert('📧 Sending email report...', 'info');
+
+                    // Send email using EmailJS
+                    emailjs.send(
+                        this.emailConfig.serviceId,
+                        this.emailConfig.templateId,
+                        templateParams
+                    ).then(
+                        (response) => {
+                            console.log('Email sent successfully:', response);
+                            this.showAlert('📧 Email report sent successfully!', 'success');
+                        },
+                        (error) => {
+                            console.error('Email sending failed:', error);
+                            this.showAlert('❌ Failed to send email: ' + error.text, 'error');
+                        }
+                    );
                     
                 } catch (error) {
                     console.error('Email error:', error);
                     this.showAlert('❌ Failed to send email report', 'error');
+                }
+            }
+
+            // Test EmailJS configuration
+            testEmailConfig() {
+                try {
+                    if (!this.emailConfig.publicKey || !this.emailConfig.serviceId || !this.emailConfig.templateId) {
+                        this.showAlert('Please fill all EmailJS configuration fields', 'warning');
+                        return;
+                    }
+
+                    const recipient = document.getElementById('defaultRecipient').value || 'test@example.com';
+                    
+                    // Prepare test email parameters
+                    const templateParams = {
+                        to_email: recipient,
+                        transaction_id: 'TEST-12345',
+                        account_number: '100',
+                        amount: '$1,000.00',
+                        location: 'Test Location',
+                        risk_score: '25%',
+                        risk_level: 'LOW',
+                        alerts: 'Test alert 1, Test alert 2',
+                        timestamp: new Date().toLocaleString(),
+                        status: 'clean'
+                    };
+
+                    // Show loading state
+                    this.showAlert('📧 Sending test email...', 'info');
+
+                    // Send test email using EmailJS
+                    emailjs.send(
+                        this.emailConfig.serviceId,
+                        this.emailConfig.templateId,
+                        templateParams
+                    ).then(
+                        (response) => {
+                            console.log('Test email sent successfully:', response);
+                            this.showAlert('✅ Test email sent successfully! Check your inbox.', 'success');
+                        },
+                        (error) => {
+                            console.error('Test email sending failed:', error);
+                            this.showAlert('❌ Test email failed: ' + error.text, 'error');
+                        }
+                    );
+                    
+                } catch (error) {
+                    console.error('Test email error:', error);
+                    this.showAlert('❌ Failed to send test email', 'error');
                 }
             }
 
@@ -968,8 +1225,8 @@ Confidential Report - For authorized personnel only
                             <button class="report-btn pdf" onclick="fraudSystem.generatePDFReport(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
                                 📄 PDF
                             </button>
-                            <button class="report-btn sms" onclick="fraudSystem.sendSMSAlert(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
-                                📱 SMS
+                            <button class="report-btn email" onclick="fraudSystem.sendEmailReport(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
+                                📧 Email
                             </button>
                         </div>
                     </div>
@@ -1090,7 +1347,7 @@ Confidential Report - For authorized personnel only
             }
         }
 
-     
+        // Initialize the system when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing system...');
             window.fraudSystem = new FraudDetectionSystem();
