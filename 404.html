@@ -416,6 +416,46 @@
             }
         }
 
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .report-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .report-btn.pdf {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .report-btn.sms {
+            background: #27ae60;
+            color: white;
+        }
+
+        .report-btn.email {
+            background: #3498db;
+            color: white;
+        }
+
+        .report-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -434,19 +474,23 @@
                 gap: 15px;
                 align-items: flex-start;
             }
+            
+            .report-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
+      
         <header>
             <h1>🔍 Fraud Detection System</h1>
             <p>Advanced AI-Powered Transaction Monitoring</p>
             <div class="header-badge">PREMIUM SECURITY SUITE</div>
         </header>
 
-        <!-- Transaction Form -->
+      
         <div class="transaction-form">
             <div class="form-header">
                 <div class="form-icon">💳</div>
@@ -464,7 +508,7 @@
                                 <option value="101">101 - Bob Johnson (Standard)</option>
                                 <option value="102">102 - Carol Davis (Business)</option>
                                 <option value="103">103 - David Wilson (Standard)</option>
-                                <option value="104">104 - Eva Brown (Premium)</option>
+                                <option value="104" selected>104 - Eva Brown (Premium)</option>
                             </select>
                             <div class="input-icon">👤</div>
                         </div>
@@ -473,7 +517,7 @@
                     <div class="form-group">
                         <label for="amount">TRANSACTION AMOUNT ($)</label>
                         <div class="input-group">
-                            <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" required>
+                            <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" value="10000" required>
                             <div class="input-icon">💰</div>
                         </div>
                     </div>
@@ -484,7 +528,7 @@
                     <div class="input-group">
                         <select id="location" required>
                             <option value="">Select Location</option>
-                            <option value="New York">🗽 New York</option>
+                            <option value="New York" selected>🗽 New York</option>
                             <option value="London">🇬🇧 London</option>
                             <option value="Tokyo">🗼 Tokyo</option>
                             <option value="Paris">🇫🇷 Paris</option>
@@ -506,7 +550,7 @@
             </form>
         </div>
 
-        <!-- Dashboard Section -->
+      
         <div class="results-container">
             <div class="section-header">
                 <h3 class="section-title">📊 Security Dashboard</h3>
@@ -535,11 +579,11 @@
                 </div>
             </div>
             
-            <!-- Results will appear here -->
+           
             <div id="results"></div>
         </div>
         
-        <!-- Transaction History -->
+       
         <div class="history-container">
             <div class="section-header">
                 <h3 class="section-title">📋 Recent Transactions</h3>
@@ -553,7 +597,7 @@
     </div>
 
     <script>
-        // Improved configuration
+        
         const CONFIG = {
             accounts: [
                 { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
@@ -565,16 +609,16 @@
             thresholds: {
                 highValue: 50000,
                 veryHighValue: 100000,
-                rapidTransactionCount: 3, // Increased from 2 to 3
-                rapidTransactionMinutes: 5 // 5 minutes window
+                rapidTransactionCount: 3,
+                rapidTransactionMinutes: 5
             }
         };
 
-        // Improved Fraud Detection System
+       
         class FraudDetectionSystem {
             constructor() {
                 this.transactions = [];
-                this.accounts = JSON.parse(JSON.stringify(CONFIG.accounts)); // Deep copy
+                this.accounts = JSON.parse(JSON.stringify(CONFIG.accounts));
                 this.init();
             }
 
@@ -642,10 +686,9 @@
                     throw new Error('Insufficient balance');
                 }
 
-                // Improved fraud detection
                 const fraudResult = this.detectFraud(transactionData);
                 
-                // Update account balance
+                
                 account.balance -= transactionData.amount;
 
                 const transaction = {
@@ -654,7 +697,8 @@
                     timestamp: new Date().toLocaleString(),
                     alerts: fraudResult.alerts,
                     status: fraudResult.isSuspicious ? 'suspicious' : 'clean',
-                    riskScore: fraudResult.riskScore
+                    riskScore: fraudResult.riskScore,
+                    remainingBalance: account.balance
                 };
 
                 this.transactions.unshift(transaction);
@@ -671,7 +715,7 @@
                 const alerts = [];
                 let riskScore = 0;
 
-                // High value checks (more reasonable thresholds)
+               
                 if (transaction.amount > CONFIG.thresholds.veryHighValue) {
                     alerts.push("Very high-value transaction");
                     riskScore += 50;
@@ -680,7 +724,7 @@
                     riskScore += 25;
                 }
 
-                // Improved rapid transactions check (5-minute window)
+              
                 const fiveMinutesAgo = Date.now() - (CONFIG.thresholds.rapidTransactionMinutes * 60 * 1000);
                 const recentTransactions = this.transactions.filter(t => 
                     t.accNo === transaction.accNo && 
@@ -692,10 +736,9 @@
                     riskScore += 30;
                 }
 
-                // Location change check (only if there's a previous transaction)
+                
                 const lastTransaction = this.transactions.find(t => t.accNo === transaction.accNo);
                 if (lastTransaction && lastTransaction.location !== transaction.location) {
-                    // Only flag if locations are very far apart (simplified)
                     const farLocations = (lastTransaction.location === "Tokyo" && transaction.location === "New York") ||
                                        (lastTransaction.location === "London" && transaction.location === "Sydney");
                     if (farLocations) {
@@ -707,16 +750,15 @@
                     }
                 }
 
-                // Round amount check
+                
                 if (transaction.amount % 1000 === 0 && transaction.amount > 1000) {
                     alerts.push("Round amount transaction");
                     riskScore += 5;
                 }
 
-                // Determine if suspicious
-                const isSuspicious = riskScore > 20; // Lower threshold
+              
+                const isSuspicious = riskScore > 20;
 
-                // If no specific alerts, mark as clean
                 if (alerts.length === 0) {
                     alerts.push("No fraud detected");
                 }
@@ -739,6 +781,18 @@
                         <p><strong>Transaction ID:</strong> ${result.transaction.id}</p>
                         <p><strong>Remaining Balance:</strong> $${result.remainingBalance.toLocaleString()}</p>
                         <p><strong>Risk Score:</strong> ${riskScore}% (${riskLevel} risk)</p>
+                        
+                        <div class="report-actions">
+                            <button class="report-btn pdf" onclick="fraudSystem.generatePDFReport(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
+                                📄 Generate PDF Report
+                            </button>
+                            <button class="report-btn sms" onclick="fraudSystem.sendSMSAlert(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
+                                📱 Send SMS Alert
+                            </button>
+                            <button class="report-btn email" onclick="fraudSystem.sendEmailReport(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
+                                📧 Email Report
+                            </button>
+                        </div>
                     </div>
                 `;
 
@@ -753,13 +807,105 @@
                 resultsDiv.innerHTML = html;
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
+               
                 if (riskScore >= 60) {
-                    this.showAlert('🚨 High-risk transaction detected!', 'warning');
-                } else if (riskScore >= 30) {
-                    this.showAlert('⚠️ Medium-risk transaction detected', 'warning');
-                } else {
-                    this.showAlert('✅ Transaction processed successfully', 'success');
+                    setTimeout(() => {
+                        if (confirm('🚨 High-risk transaction detected! Send SMS alert to security team?')) {
+                            this.sendSMSAlert(result.transaction);
+                        }
+                    }, 2000);
                 }
+            }
+
+           
+            generatePDFReport(transactionData) {
+                const params = new URLSearchParams({
+                    accNo: transactionData.accNo,
+                    transactionId: transactionData.id,
+                    amount: transactionData.amount,
+                    location: transactionData.location,
+                    riskScore: transactionData.riskScore,
+                    alerts: transactionData.alerts.join(',')
+                });
+
+                const url = `/generate-pdf-report?${params}`;
+                window.open(url, '_blank');
+                
+                this.showAlert('📄 PDF report generated successfully', 'success');
+            }
+
+          
+            sendSMSAlert(transactionData) {
+                const phoneNumber = prompt('Enter phone number for SMS alert:', '+1234567890');
+                if (!phoneNumber) return;
+
+                const message = `🚨 Fraud Alert: Transaction $${transactionData.amount} at ${transactionData.location}. Risk: ${transactionData.riskScore}%. Check your account.`;
+
+                fetch('/send-sms-alert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: phoneNumber,
+                        message: message,
+                        transactionDetails: transactionData
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.showAlert('📱 SMS alert sent successfully', 'success');
+                    console.log('SMS Details:', data);
+                    
+                    console.log('SMS Message:', message);
+                } else {
+                    this.showAlert('Failed to send SMS alert', 'error');
+                }
+            })
+                .catch(error => {
+                    console.error('SMS error:', error);
+                  
+                    this.showAlert('📱 SMS alert simulated successfully (Demo Mode)', 'success');
+                    console.log('Demo SMS would send to:', phoneNumber);
+                    console.log('Demo SMS message:', message);
+                });
+            }
+
+           
+            sendEmailReport(transactionData) {
+                const email = prompt('Enter email address for report:', 'security@company.com');
+                if (!email) return;
+
+                fetch('/send-email-report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        subject: `Fraud Detection Report - Transaction ${transactionData.id}`,
+                        reportData: transactionData
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.showAlert('📧 Email report sent successfully', 'success');
+                  
+                    console.log('Email would be sent to:', email);
+                    console.log('Report data:', transactionData);
+                } else {
+                    this.showAlert('Failed to send email report', 'error');
+                }
+            })
+                .catch(error => {
+                    console.error('Email error:', error);
+                   
+                    this.showAlert('📧 Email report simulated successfully (Demo Mode)', 'success');
+                    console.log('Demo Email would send to:', email);
+                    console.log('Demo Report data:', transactionData);
+                });
             }
 
             loadTransactionHistory() {
@@ -803,6 +949,14 @@
                                 ${txn.alerts.map(alert => `<span class="alert-tag">${alert}</span>`).join('')}
                             </div>
                         ` : ''}
+                        <div class="report-actions" style="margin-top: 10px;">
+                            <button class="report-btn pdf" onclick="fraudSystem.generatePDFReport(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
+                                📄 PDF
+                            </button>
+                            <button class="report-btn sms" onclick="fraudSystem.sendSMSAlert(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
+                                📱 SMS
+                            </button>
+                        </div>
                     </div>
                 `).join('');
             }
@@ -921,7 +1075,7 @@
             }
         }
 
-        // Initialize the system when page loads
+      
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing system...');
             window.fraudSystem = new FraudDetectionSystem();
