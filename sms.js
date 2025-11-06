@@ -1,79 +1,53 @@
-const express = require('express');
-const router = express.Router();
-const { sendSMS, validatePhoneNumber, isTwilioConfigured } = require('../config/twilio');
+// sms.js
+const TwilioService = require('./twilio');
 
-// Send SMS endpoint
-router.post('/send', async (req, res) => {
-    try {
-        const { to, message, transactionId } = req.body;
-
-        // Validation
-        if (!to || !message) {
-            return res.status(400).json({
-                success: false,
-                error: 'Missing required fields: to and message'
-            });
-        }
-
-        if (!validatePhoneNumber(to)) {
-            return res.status(400).json({
-                success: false,
-                error: 'Invalid phone number format. Use international format: +1234567890'
-            });
-        }
-
-        if (!isTwilioConfigured()) {
-            return res.status(500).json({
-                success: false,
-                error: 'SMS service is not configured. Please check Twilio settings.'
-            });
-        }
-
-        // Send SMS
-        const result = await sendSMS(to, message);
-
-        // Log the transaction
-        console.log('SMS Sent:', {
-            transactionId,
-            to: result.to,
-            messageId: result.messageId,
-            timestamp: new Date().toISOString()
-        });
-
-        res.json({
-            success: true,
-            messageId: result.messageId,
-            status: result.status,
-            to: result.to,
-            transactionId: transactionId
-        });
-
-    } catch (error) {
-        console.error('SMS Send Error:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+class SMSService {
+    constructor() {
+        this.twilio = new TwilioService();
+        this.smsLogs = [];
     }
-});
 
-// SMS status check
-router.get('/status/:messageId', async (req, res) => {
-    try {
-        // This would require additional Twilio setup for webhooks
-        // For now, return basic status
-        res.json({
-            success: true,
-            messageId: req.params.messageId,
-            status: 'delivered', // This would be fetched from Twilio in production
-            timestamp: new Date().toISOString()
+    async sendAlert(transaction, phoneNumber, type = 'fraud') {
+        let result;
+        
+        if (type === 'fraud') {
+            result = await this.twilio.sendFraudAlert(transaction, phoneNumber);
+        } else {
+            result = await this.twilio.sendTransactionConfirmation(transaction, phoneNumber);
+        }
+
+        // Log the SMS
+        this.logSMS({
+            transactionId: transaction.id,
+            phoneNumber: phoneNumber,
+            message: type,
+            timestamp: new Date().toISOString(),
+            success: result.success,
+            sid: result.sid,
+            type: type
         });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+
+        return result;
     }
-});
 
-module.exports = router;
+    logSMS(smsData) {
+        this.smsLogs.unshift(smsData);
+        // Keep only last 100 logs
+        if (this.smsLogs.length > 100) {
+            this.smsLogs = this.smsLogs.slice(0, 100);
+        }
+        
+        // In a real app, save to database
+        console.log('SMS Log:', smsData);
+    }
+
+    getSMSHistory(limit = 10) {
+        return this.smsLogs.slice(0, limit);
+    }
+
+    getSMSByTransaction(transactionId) {
+        return this.smsLogs.filter(log => log.transactionId === transactionId);
+    }
+}
+
+module.exports = SMSService;
