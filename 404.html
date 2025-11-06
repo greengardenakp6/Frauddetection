@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fraud Detection System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/twilio@4.26.0/dist/twilio.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -108,7 +110,7 @@
             position: relative;
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e9ecef;
@@ -118,7 +120,7 @@
             background: white;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
@@ -519,52 +521,12 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-family: inherit;
         }
 
         .modal-footer {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-        }
-
-        .mobile-setup {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            border-left: 4px solid #3498db;
-        }
-
-        .mobile-setup h4 {
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-
-        .api-config {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border-left: 4px solid #ffc107;
-        }
-
-        .api-config h5 {
-            margin-bottom: 10px;
-            color: #856404;
-        }
-
-        .backend-status {
-            background: #d4edda;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border-left: 4px solid #28a745;
-        }
-
-        .backend-status.error {
-            background: #f8d7da;
-            border-left-color: #dc3545;
         }
 
         @media (max-width: 768px) {
@@ -598,7 +560,7 @@
         <header>
             <h1>🔍 Fraud Detection System</h1>
             <p>Advanced AI-Powered Transaction Monitoring</p>
-            <div class="header-badge">STANDALONE MODE</div>
+            <div class="header-badge">PREMIUM SECURITY SUITE</div>
         </header>
 
         <!-- Transaction Form -->
@@ -634,30 +596,19 @@
                     </div>
                 </div>
 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="location">TRANSACTION LOCATION</label>
-                        <div class="input-group">
-                            <select id="location" required>
-                                <option value="">Select Location</option>
-                                <option value="New York" selected>🗽 New York</option>
-                                <option value="London">🇬🇧 London</option>
-                                <option value="Tokyo">🗼 Tokyo</option>
-                                <option value="Paris">🇫🇷 Paris</option>
-                                <option value="Sydney">🇦🇺 Sydney</option>
-                                <option value="Dubai">🇦🇪 Dubai</option>
-                            </select>
-                            <div class="input-icon">🌍</div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="mobileNumber">MOBILE NUMBER FOR ALERTS</label>
-                        <div class="input-group">
-                            <input type="tel" id="mobileNumber" placeholder="+1234567890" value="+1234567890" required>
-                            <div class="input-icon">📱</div>
-                        </div>
-                        <small style="color: #6c757d; font-size: 0.85em;">Enter your mobile number with country code</small>
+                <div class="form-group">
+                    <label for="location">TRANSACTION LOCATION</label>
+                    <div class="input-group">
+                        <select id="location" required>
+                            <option value="">Select Location</option>
+                            <option value="New York" selected>🗽 New York</option>
+                            <option value="London">🇬🇧 London</option>
+                            <option value="Tokyo">🗼 Tokyo</option>
+                            <option value="Paris">🇫🇷 Paris</option>
+                            <option value="Sydney">🇦🇺 Sydney</option>
+                            <option value="Dubai">🇦🇪 Dubai</option>
+                        </select>
+                        <div class="input-icon">🌍</div>
                     </div>
                 </div>
 
@@ -670,28 +621,6 @@
                     </button>
                 </div>
             </form>
-            
-            <div class="mobile-setup">
-                <h4>✅ System Status: FULLY OPERATIONAL</h4>
-                <p>This system works completely standalone - no backend server needed!</p>
-                
-                <div class="backend-status">
-                    <h5>🔧 System Mode: <span id="statusText">STANDALONE</span></h5>
-                    <p id="statusMessage">All fraud detection features are working without backend</p>
-                </div>
-                
-                <div class="api-config">
-                    <h5>🚀 Features Working:</h5>
-                    <ul style="margin-left: 20px; color: #856404;">
-                        <li>✅ Fraud Detection Algorithms</li>
-                        <li>✅ PDF Report Generation</li>
-                        <li>✅ Transaction History</li>
-                        <li>✅ Real-time Alerts</li>
-                        <li>✅ Risk Scoring</li>
-                        <li>✅ Data Export</li>
-                    </ul>
-                </div>
-            </div>
         </div>
 
         <!-- Dashboard Section -->
@@ -738,34 +667,81 @@
             </div>
             <div id="historyList" class="transaction-grid"></div>
         </div>
+
+        <!-- SMS History Section -->
+        <div class="history-container">
+            <div class="section-header">
+                <h3 class="section-title">📱 SMS Notification History</h3>
+                <div class="section-actions">
+                    <button class="action-btn" id="clearSMSHistory">🗑️ Clear</button>
+                    <button class="action-btn" id="exportSMSHistory">💾 Export</button>
+                </div>
+            </div>
+            <div id="smsHistoryList" class="transaction-grid"></div>
+        </div>
     </div>
 
     <!-- SMS Modal -->
     <div id="smsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">📱 SMS Alert Simulation</h3>
+                <h3 class="modal-title">📱 Send SMS Alert</h3>
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-control">
                     <label for="phoneNumber">Phone Number</label>
-                    <input type="tel" id="phoneNumber" placeholder="+1234567890">
+                    <input type="tel" id="phoneNumber" placeholder="+1234567890" value="+1234567890">
                 </div>
                 <div class="form-control">
                     <label for="smsMessage">Message</label>
-                    <textarea id="smsMessage" rows="4"></textarea>
+                    <textarea id="smsMessage" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelSMS">Cancel</button>
-                <button class="btn btn-primary" id="sendSMS">Simulate SMS</button>
+                <button class="btn btn-primary" id="sendSMS">Send SMS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">📧 Send Email Report</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-control">
+                    <label for="emailAddress">Email Address</label>
+                    <input type="email" id="emailAddress" placeholder="security@company.com" value="security@company.com">
+                </div>
+                <div class="form-control">
+                    <label for="emailSubject">Subject</label>
+                    <input type="text" id="emailSubject" placeholder="Fraud Detection Report">
+                </div>
+                <div class="form-control">
+                    <label for="emailMessage">Message</label>
+                    <textarea id="emailMessage" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelEmail">Cancel</button>
+                <button class="btn btn-primary" id="sendEmail">Send Email</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Enhanced configuration - NO BACKEND NEEDED
+        // Twilio Configuration - REPLACE WITH YOUR ACTUAL CREDENTIALS
+        const TWILIO_CONFIG = {
+            accountSid: 'YOUR_TWILIO_ACCOUNT_SID', // Replace with your Account SID
+            authToken: 'YOUR_TWILIO_AUTH_TOKEN',   // Replace with your Auth Token
+            phoneNumber: 'YOUR_TWILIO_PHONE_NUMBER' // Replace with your Twilio number
+        };
+
+        // Enhanced configuration
         const CONFIG = {
             accounts: [
                 { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
@@ -782,24 +758,21 @@
             }
         };
 
-        // Enhanced Fraud Detection System - COMPLETELY STANDALONE
+        // Enhanced Fraud Detection System with Twilio SMS Integration
         class FraudDetectionSystem {
             constructor() {
                 this.transactions = [];
                 this.accounts = JSON.parse(JSON.stringify(CONFIG.accounts));
                 this.currentTransaction = null;
-                this.backendConnected = true; // Always true in standalone mode
                 this.init();
             }
 
-            async init() {
-                console.log('🔍 Fraud Detection System Started - STANDALONE MODE');
+            init() {
+                console.log('Fraud Detection System Started');
                 this.setupEventListeners();
                 this.loadTransactionHistory();
+                this.displaySMSHistory();
                 this.updateStats();
-                
-                // Show success message
-                this.showAlert('✅ System ready! All features working in standalone mode.', 'success');
             }
 
             setupEventListeners() {
@@ -810,13 +783,29 @@
                 document.getElementById('clearHistory').addEventListener('click', () => this.clearHistory());
                 document.getElementById('exportData').addEventListener('click', () => this.exportData());
                 
+                // SMS History event listeners
+                document.getElementById('clearSMSHistory').addEventListener('click', () => this.clearSMSHistory());
+                document.getElementById('exportSMSHistory').addEventListener('click', () => this.exportSMSHistory());
+                
                 // Modal event listeners
                 document.querySelectorAll('.close-modal').forEach(btn => {
                     btn.addEventListener('click', () => this.closeModal());
                 });
                 
                 document.getElementById('cancelSMS').addEventListener('click', () => this.closeModal());
+                document.getElementById('cancelEmail').addEventListener('click', () => this.closeModal());
+                
                 document.getElementById('sendSMS').addEventListener('click', () => this.sendSMS());
+                document.getElementById('sendEmail').addEventListener('click', () => this.sendEmail());
+                
+                // Close modal when clicking outside
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            this.closeModal();
+                        }
+                    });
+                });
             }
 
             handleTransaction(e) {
@@ -825,9 +814,8 @@
                 const accNo = document.getElementById('accNo').value;
                 const amount = parseFloat(document.getElementById('amount').value);
                 const location = document.getElementById('location').value;
-                const mobileNumber = document.getElementById('mobileNumber').value;
 
-                if (!accNo || !amount || amount <= 0 || !location || !mobileNumber) {
+                if (!accNo || !amount || amount <= 0 || !location) {
                     this.showAlert('Please fill all fields correctly', 'error');
                     return;
                 }
@@ -842,8 +830,7 @@
                         const result = this.processTransaction({
                             accNo: parseInt(accNo),
                             amount: amount,
-                            location: location,
-                            mobileNumber: mobileNumber
+                            location: location
                         });
                         
                         this.displayResults(result);
@@ -857,11 +844,6 @@
                         submitBtn.innerHTML = originalText;
                     }
                 }, 1500);
-            }
-
-            validatePhoneNumber(phone) {
-                const phoneRegex = /^\+\d{10,15}$/;
-                return phoneRegex.test(phone);
             }
 
             processTransaction(transactionData) {
@@ -895,6 +877,7 @@
                 this.transactions.unshift(transaction);
                 this.saveToLocalStorage();
                 
+                // Store current transaction for reporting
                 this.currentTransaction = transaction;
 
                 return {
@@ -949,13 +932,6 @@
                     riskScore += 5;
                 }
 
-                // New account activity check
-                const accountTransactions = this.transactions.filter(t => t.accNo === transaction.accNo);
-                if (accountTransactions.length === 0 && transaction.amount > 10000) {
-                    alerts.push("Large transaction on new account");
-                    riskScore += 20;
-                }
-
                 // Determine if suspicious
                 const isSuspicious = riskScore > 20;
 
@@ -979,7 +955,6 @@
                     <div class="alert alert-success">
                         <h3>✅ Transaction Successful</h3>
                         <p><strong>Transaction ID:</strong> ${result.transaction.id}</p>
-                        <p><strong>Account:</strong> ${result.transaction.accNo} - ${result.transaction.accountName}</p>
                         <p><strong>Remaining Balance:</strong> $${result.remainingBalance.toLocaleString()}</p>
                         <p><strong>Risk Score:</strong> ${riskScore}% (${riskLevel} risk)</p>
                         
@@ -988,7 +963,10 @@
                                 📄 Generate PDF Report
                             </button>
                             <button class="report-btn sms" onclick="fraudSystem.openSMSModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
-                                📱 Simulate SMS Alert
+                                📱 Send SMS Alert
+                            </button>
+                            <button class="report-btn email" onclick="fraudSystem.openEmailModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
+                                📧 Email Report
                             </button>
                         </div>
                     </div>
@@ -1005,14 +983,17 @@
                 resultsDiv.innerHTML = html;
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
-                // Auto-show SMS modal for high risk transactions
+                // Auto-alert for high risk
                 if (riskScore >= 60) {
                     setTimeout(() => {
-                        this.openSMSModal(result.transaction);
-                    }, 1000);
+                        if (confirm('🚨 High-risk transaction detected! Send SMS alert to security team?')) {
+                            this.openSMSModal(result.transaction);
+                        }
+                    }, 2000);
                 }
             }
 
+            // PDF Generation with SMS logs
             generatePDFReport(transactionData) {
                 try {
                     const { jsPDF } = window.jspdf;
@@ -1063,6 +1044,32 @@
                         doc.text(`• ${alert}`, 25, yPos);
                     });
                     
+                    // Add SMS notification history for this transaction
+                    const smsLogs = JSON.parse(localStorage.getItem('fraudSMSLogs') || '[]');
+                    const transactionSMS = smsLogs.filter(log => log.transactionId === transactionData.id);
+                    
+                    if (transactionSMS.length > 0) {
+                        yPos += 15;
+                        doc.setFontSize(16);
+                        doc.text('SMS Notifications Sent', 20, yPos);
+                        
+                        doc.setFontSize(10);
+                        transactionSMS.forEach(sms => {
+                            yPos += 8;
+                            if (yPos > 270) {
+                                doc.addPage();
+                                yPos = 20;
+                            }
+                            doc.text(`• To: ${sms.phoneNumber} - ${sms.timestamp}`, 25, yPos);
+                            yPos += 6;
+                            if (yPos > 270) {
+                                doc.addPage();
+                                yPos = 20;
+                            }
+                            doc.text(`  Message: ${sms.message.substring(0, 50)}...`, 25, yPos);
+                        });
+                    }
+                    
                     // Add footer
                     doc.setFontSize(10);
                     doc.setTextColor(128, 128, 128);
@@ -1078,54 +1085,175 @@
                 }
             }
 
+            // SMS Modal
             openSMSModal(transactionData) {
                 this.currentTransaction = transactionData;
-                const message = this.generateSMSMessage(transactionData);
+                const message = `🚨 Fraud Alert: Transaction $${transactionData.amount} at ${transactionData.location}. Risk: ${transactionData.riskScore}%. Check your account.`;
                 
-                document.getElementById('phoneNumber').value = transactionData.mobileNumber;
                 document.getElementById('smsMessage').value = message;
                 document.getElementById('smsModal').style.display = 'flex';
             }
 
-            generateSMSMessage(transaction) {
-                const riskLevel = transaction.riskScore >= 60 ? 'HIGH RISK' : 
-                                transaction.riskScore >= 30 ? 'MEDIUM RISK' : 'LOW RISK';
+            // Email Modal
+            openEmailModal(transactionData) {
+                this.currentTransaction = transactionData;
+                const subject = `Fraud Detection Report - Transaction ${transactionData.id}`;
+                const message = `Dear Security Team,\n\nA transaction has been processed with the following details:\n\nTransaction ID: ${transactionData.id}\nAccount: ${transactionData.accNo} - ${transactionData.accountName}\nAmount: $${transactionData.amount}\nLocation: ${transactionData.location}\nRisk Score: ${transactionData.riskScore}%\nStatus: ${transactionData.status}\n\nAlerts:\n${transactionData.alerts.map(alert => `• ${alert}`).join('\n')}\n\nPlease review this transaction for potential fraud.\n\nBest regards,\nFraud Detection System`;
                 
-                return `🚨 FRAUD ALERT: Transaction $${transaction.amount} at ${transaction.location}. Risk: ${transaction.riskScore}% (${riskLevel}). Account: ${transaction.accNo}. Timestamp: ${transaction.timestamp}. Please verify immediately.`;
+                document.getElementById('emailSubject').value = subject;
+                document.getElementById('emailMessage').value = message;
+                document.getElementById('emailModal').style.display = 'flex';
             }
 
+            // Close Modal
             closeModal() {
                 document.querySelectorAll('.modal').forEach(modal => {
                     modal.style.display = 'none';
                 });
             }
 
+            // SMS Alert with Twilio
             sendSMS() {
-                const phone = document.getElementById('phoneNumber').value;
+                const phoneNumber = document.getElementById('phoneNumber').value;
                 const message = document.getElementById('smsMessage').value;
 
-                if (!phone || !message) {
-                    this.showAlert('Please enter phone number and message', 'error');
+                if (!phoneNumber || !message) {
+                    this.showAlert('Please fill all fields', 'error');
                     return;
                 }
 
-                if (!this.validatePhoneNumber(phone)) {
-                    this.showAlert('Please enter a valid mobile number with country code', 'error');
-                    return;
-                }
-
-                // Simulate SMS sending
+                // Show loading state
                 const sendBtn = document.getElementById('sendSMS');
                 const originalText = sendBtn.innerHTML;
                 sendBtn.disabled = true;
                 sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
 
-                setTimeout(() => {
-                    this.showAlert('✅ SMS Simulation: Alert would be sent to ' + phone, 'success');
-                    this.closeModal();
+                try {
+                    // Initialize Twilio client
+                    const client = Twilio(TWILIO_CONFIG.accountSid, TWILIO_CONFIG.authToken);
+
+                    // Send SMS via Twilio
+                    client.messages.create({
+                        body: message,
+                        from: TWILIO_CONFIG.+919994247213,
+                        to: +919994458119
+                    })
+                    .then(message => {
+                        console.log('SMS sent successfully:', message.sid);
+                        this.showAlert('📱 SMS alert sent successfully via Twilio', 'success');
+                        this.closeModal();
+                        
+                        // Log the SMS for tracking
+                        this.logSMSNotification({
+                            transactionId: this.currentTransaction.id,
+                            phoneNumber: phoneNumber,
+                            message: message,
+                            timestamp: new Date().toLocaleString(),
+                            twilioSid: message.sid
+                        });
+                        
+                        // Refresh SMS history display
+                        this.displaySMSHistory();
+                    })
+                    .catch(error => {
+                        console.error('Twilio SMS error:', error);
+                        this.showAlert(`Failed to send SMS: ${error.message}`, 'error');
+                    })
+                    .finally(() => {
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = originalText;
+                    });
+                } catch (error) {
+                    console.error('Twilio initialization error:', error);
+                    this.showAlert('Twilio not configured properly. Please check your credentials.', 'error');
                     sendBtn.disabled = false;
-                    sendBtn.innerHTML = 'Simulate SMS';
-                }, 2000);
+                    sendBtn.innerHTML = originalText;
+                }
+            }
+
+            // Method to log SMS notifications
+            logSMSNotification(smsData) {
+                let smsLogs = JSON.parse(localStorage.getItem('fraudSMSLogs') || '[]');
+                smsLogs.unshift(smsData);
+                localStorage.setItem('fraudSMSLogs', JSON.stringify(smsLogs));
+            }
+
+            // Display SMS History
+            displaySMSHistory() {
+                const smsHistoryList = document.getElementById('smsHistoryList');
+                const smsLogs = JSON.parse(localStorage.getItem('fraudSMSLogs') || '[]');
+                const recentSMS = smsLogs.slice(0, 10);
+
+                if (recentSMS.length === 0) {
+                    smsHistoryList.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #6c757d;">
+                            <div style="font-size: 3em; margin-bottom: 10px;">📱</div>
+                            <h3>No SMS notifications yet</h3>
+                            <p>Send an SMS alert to see history</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                smsHistoryList.innerHTML = recentSMS.map(sms => `
+                    <div class="transaction-item">
+                        <div class="txn-header">
+                            <div class="txn-account">To: ${sms.phoneNumber}</div>
+                            <div class="txn-amount">${sms.timestamp}</div>
+                        </div>
+                        <div class="txn-details">
+                            <div>Transaction ID: ${sms.transactionId}</div>
+                            <div>Twilio SID: ${sms.twilioSid || 'N/A'}</div>
+                        </div>
+                        <div class="alert-badge clean">
+                            ✅ Sent
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">
+                            ${sms.message.substring(0, 100)}${sms.message.length > 100 ? '...' : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Clear SMS History
+            clearSMSHistory() {
+                if (confirm('Are you sure you want to clear all SMS history? This cannot be undone.')) {
+                    localStorage.removeItem('fraudSMSLogs');
+                    this.displaySMSHistory();
+                    this.showAlert('🗑️ SMS history cleared successfully', 'success');
+                }
+            }
+
+            // Export SMS History
+            exportSMSHistory() {
+                const smsLogs = JSON.parse(localStorage.getItem('fraudSMSLogs') || '[]');
+                const exportData = {
+                    system: "Fraud Detection System - SMS Logs",
+                    exportDate: new Date().toISOString(),
+                    totalSMS: smsLogs.length,
+                    smsLogs: smsLogs
+                };
+                
+                this.downloadJSON(exportData, `sms-logs-${new Date().toISOString().split('T')[0]}.json`);
+                this.showAlert('💾 SMS history exported successfully', 'success');
+            }
+
+            // Email Report
+            sendEmail() {
+                const email = document.getElementById('emailAddress').value;
+                const subject = document.getElementById('emailSubject').value;
+                const message = document.getElementById('emailMessage').value;
+
+                if (!email || !subject || !message) {
+                    this.showAlert('Please fill all fields', 'error');
+                    return;
+                }
+
+                // Simulate email sending for demo
+                setTimeout(() => {
+                    this.showAlert('📧 Email report simulated successfully (Demo Mode)', 'success');
+                    this.closeModal();
+                }, 1000);
             }
 
             loadTransactionHistory() {
@@ -1154,13 +1282,12 @@
                 historyList.innerHTML = recentTransactions.map(txn => `
                     <div class="transaction-item ${txn.status}">
                         <div class="txn-header">
-                            <div class="txn-account">${txn.accNo} - ${txn.accountName}</div>
+                            <div class="txn-account">Account: ${txn.accNo}</div>
                             <div class="txn-amount">$${txn.amount.toLocaleString()}</div>
                         </div>
                         <div class="txn-details">
                             <div>📍 ${txn.location}</div>
                             <div>🕒 ${txn.timestamp}</div>
-                            <div>📱 ${txn.mobileNumber}</div>
                         </div>
                         <div class="alert-badge ${txn.status}">
                             ${txn.status === 'suspicious' ? '🚨 Suspicious' : '✅ Clean'} (${txn.riskScore}%)
@@ -1298,7 +1425,7 @@
 
         // Initialize the system when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing standalone fraud detection system...');
+            console.log('DOM loaded, initializing system...');
             window.fraudSystem = new FraudDetectionSystem();
         });
     </script>
