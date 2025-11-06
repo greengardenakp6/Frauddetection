@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fraud Detection System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -515,17 +514,31 @@
             font-weight: 500;
         }
 
-        .form-control input {
+        .form-control input, .form-control textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            font-family: inherit;
         }
 
         .modal-footer {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
+        }
+
+        .mobile-setup {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .mobile-setup h4 {
+            margin-bottom: 15px;
+            color: #2c3e50;
         }
 
         @media (max-width: 768px) {
@@ -559,7 +572,7 @@
         <header>
             <h1>🔍 Fraud Detection System</h1>
             <p>Advanced AI-Powered Transaction Monitoring</p>
-            <div class="header-badge">PREMIUM SECURITY SUITE</div>
+            <div class="header-badge">LIVE SMS ALERTS</div>
         </header>
 
         <!-- Transaction Form -->
@@ -595,19 +608,30 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="location">TRANSACTION LOCATION</label>
-                    <div class="input-group">
-                        <select id="location" required>
-                            <option value="">Select Location</option>
-                            <option value="New York" selected>🗽 New York</option>
-                            <option value="London">🇬🇧 London</option>
-                            <option value="Tokyo">🗼 Tokyo</option>
-                            <option value="Paris">🇫🇷 Paris</option>
-                            <option value="Sydney">🇦🇺 Sydney</option>
-                            <option value="Dubai">🇦🇪 Dubai</option>
-                        </select>
-                        <div class="input-icon">🌍</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="location">TRANSACTION LOCATION</label>
+                        <div class="input-group">
+                            <select id="location" required>
+                                <option value="">Select Location</option>
+                                <option value="New York" selected>🗽 New York</option>
+                                <option value="London">🇬🇧 London</option>
+                                <option value="Tokyo">🗼 Tokyo</option>
+                                <option value="Paris">🇫🇷 Paris</option>
+                                <option value="Sydney">🇦🇺 Sydney</option>
+                                <option value="Dubai">🇦🇪 Dubai</option>
+                            </select>
+                            <div class="input-icon">🌍</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mobileNumber">MOBILE NUMBER FOR ALERTS</label>
+                        <div class="input-group">
+                            <input type="tel" id="mobileNumber" placeholder="+1234567890" required>
+                            <div class="input-icon">📱</div>
+                        </div>
+                        <small style="color: #6c757d; font-size: 0.85em;">Enter your mobile number with country code</small>
                     </div>
                 </div>
 
@@ -620,6 +644,17 @@
                     </button>
                 </div>
             </form>
+            
+            <div class="mobile-setup">
+                <h4>📱 Real SMS Integration</h4>
+                <p>This system uses Twilio API for real SMS alerts. To enable:</p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>Sign up for a <a href="https://www.twilio.com" target="_blank">Twilio account</a></li>
+                    <li>Get your Account SID and Auth Token</li>
+                    <li>Add your Twilio phone number</li>
+                    <li>Configure the backend with your credentials</li>
+                </ol>
+            </div>
         </div>
 
         <!-- Dashboard Section -->
@@ -678,44 +713,16 @@
             <div class="modal-body">
                 <div class="form-control">
                     <label for="phoneNumber">Phone Number</label>
-                    <input type="tel" id="phoneNumber" placeholder="+1234567890" value="+1234567890">
+                    <input type="tel" id="phoneNumber" placeholder="+1234567890">
                 </div>
                 <div class="form-control">
                     <label for="smsMessage">Message</label>
-                    <textarea id="smsMessage" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+                    <textarea id="smsMessage" rows="4"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelSMS">Cancel</button>
                 <button class="btn btn-primary" id="sendSMS">Send SMS</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Email Modal -->
-    <div id="emailModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">📧 Send Email Report</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-control">
-                    <label for="emailAddress">Email Address</label>
-                    <input type="email" id="emailAddress" placeholder="security@company.com" value="security@company.com">
-                </div>
-                <div class="form-control">
-                    <label for="emailSubject">Subject</label>
-                    <input type="text" id="emailSubject" placeholder="Fraud Detection Report">
-                </div>
-                <div class="form-control">
-                    <label for="emailMessage">Message</label>
-                    <textarea id="emailMessage" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelEmail">Cancel</button>
-                <button class="btn btn-primary" id="sendEmail">Send Email</button>
             </div>
         </div>
     </div>
@@ -735,10 +742,16 @@
                 veryHighValue: 100000,
                 rapidTransactionCount: 3,
                 rapidTransactionMinutes: 5
+            },
+            // Twilio configuration (replace with your actual credentials)
+            twilio: {
+                accountSid: 'YOUR_TWILIO_ACCOUNT_SID',
+                authToken: 'YOUR_TWILIO_AUTH_TOKEN',
+                fromNumber: 'YOUR_TWILIO_PHONE_NUMBER'
             }
         };
 
-        // Enhanced Fraud Detection System with PDF & SMS
+        // Enhanced Fraud Detection System with Real SMS
         class FraudDetectionSystem {
             constructor() {
                 this.transactions = [];
@@ -768,19 +781,7 @@
                 });
                 
                 document.getElementById('cancelSMS').addEventListener('click', () => this.closeModal());
-                document.getElementById('cancelEmail').addEventListener('click', () => this.closeModal());
-                
-                document.getElementById('sendSMS').addEventListener('click', () => this.sendSMS());
-                document.getElementById('sendEmail').addEventListener('click', () => this.sendEmail());
-                
-                // Close modal when clicking outside
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            this.closeModal();
-                        }
-                    });
-                });
+                document.getElementById('sendSMS').addEventListener('click', () => this.sendRealSMS());
             }
 
             handleTransaction(e) {
@@ -789,9 +790,16 @@
                 const accNo = document.getElementById('accNo').value;
                 const amount = parseFloat(document.getElementById('amount').value);
                 const location = document.getElementById('location').value;
+                const mobileNumber = document.getElementById('mobileNumber').value;
 
-                if (!accNo || !amount || amount <= 0 || !location) {
+                if (!accNo || !amount || amount <= 0 || !location || !mobileNumber) {
                     this.showAlert('Please fill all fields correctly', 'error');
+                    return;
+                }
+
+                // Validate mobile number format
+                if (!this.validatePhoneNumber(mobileNumber)) {
+                    this.showAlert('Please enter a valid mobile number with country code (e.g., +1234567890)', 'error');
                     return;
                 }
 
@@ -805,7 +813,8 @@
                         const result = this.processTransaction({
                             accNo: parseInt(accNo),
                             amount: amount,
-                            location: location
+                            location: location,
+                            mobileNumber: mobileNumber
                         });
                         
                         this.displayResults(result);
@@ -819,6 +828,12 @@
                         submitBtn.innerHTML = originalText;
                     }
                 }, 1500);
+            }
+
+            validatePhoneNumber(phone) {
+                // Basic international phone number validation
+                const phoneRegex = /^\+\d{10,15}$/;
+                return phoneRegex.test(phone);
             }
 
             processTransaction(transactionData) {
@@ -940,9 +955,6 @@
                             <button class="report-btn sms" onclick="fraudSystem.openSMSModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
                                 📱 Send SMS Alert
                             </button>
-                            <button class="report-btn email" onclick="fraudSystem.openEmailModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
-                                📧 Email Report
-                            </button>
                         </div>
                     </div>
                 `;
@@ -958,13 +970,11 @@
                 resultsDiv.innerHTML = html;
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
-                // Auto-alert for high risk
+                // Auto-send SMS for high risk transactions
                 if (riskScore >= 60) {
                     setTimeout(() => {
-                        if (confirm('🚨 High-risk transaction detected! Send SMS alert to security team?')) {
-                            this.openSMSModal(result.transaction);
-                        }
-                    }, 2000);
+                        this.sendRealSMS(result.transaction.mobileNumber, result.transaction);
+                    }, 1000);
                 }
             }
 
@@ -1037,110 +1047,89 @@
             // SMS Modal
             openSMSModal(transactionData) {
                 this.currentTransaction = transactionData;
-                const message = `🚨 Fraud Alert: Transaction $${transactionData.amount} at ${transactionData.location}. Risk: ${transactionData.riskScore}%. Check your account.`;
+                const message = this.generateSMSMessage(transactionData);
                 
+                document.getElementById('phoneNumber').value = transactionData.mobileNumber;
                 document.getElementById('smsMessage').value = message;
                 document.getElementById('smsModal').style.display = 'flex';
             }
 
-            openEmailModal(transactionData) {
-                this.currentTransaction = transactionData;
-                const subject = `Fraud Detection Report - Transaction ${transactionData.id}`;
-                const message = `Dear Security Team,\n\nA transaction has been processed with the following details:\n\nTransaction ID: ${transactionData.id}\nAccount: ${transactionData.accNo} - ${transactionData.accountName}\nAmount: $${transactionData.amount}\nLocation: ${transactionData.location}\nRisk Score: ${transactionData.riskScore}%\nStatus: ${transactionData.status}\n\nAlerts:\n${transactionData.alerts.map(alert => `• ${alert}`).join('\n')}\n\nPlease review this transaction for potential fraud.\n\nBest regards,\nFraud Detection System`;
+            generateSMSMessage(transaction) {
+                const riskLevel = transaction.riskScore >= 60 ? 'HIGH RISK' : 
+                                transaction.riskScore >= 30 ? 'MEDIUM RISK' : 'LOW RISK';
                 
-                document.getElementById('emailSubject').value = subject;
-                document.getElementById('emailMessage').value = message;
-                document.getElementById('emailModal').style.display = 'flex';
+                return `🚨 FRAUD ALERT: Transaction $${transaction.amount} at ${transaction.location}. Risk: ${transaction.riskScore}% (${riskLevel}). Account: ${transaction.accNo}. Timestamp: ${transaction.timestamp}. Please verify immediately.`;
             }
 
+            // Close Modal
             closeModal() {
                 document.querySelectorAll('.modal').forEach(modal => {
                     modal.style.display = 'none';
                 });
             }
 
-            sendSMS() {
-                const phoneNumber = document.getElementById('phoneNumber').value;
-                const message = document.getElementById('smsMessage').value;
-
-                if (!phoneNumber || !message) {
-                    this.showAlert('Please fill all fields', 'error');
-                    return;
-                }
-
+            // Real SMS Integration using Twilio
+            async sendRealSMS(phoneNumber = null, transactionData = null) {
+                const phone = phoneNumber || document.getElementById('phoneNumber').value;
+                const transaction = transactionData || this.currentTransaction;
                 
-                fetch('/send-sms-alert', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        phoneNumber: phoneNumber,
-                        message: message,
-                        transactionDetails: this.currentTransaction
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        this.showAlert('📱 SMS alert sent successfully', 'success');
-                        this.closeModal();
-                    } else {
-                        this.showAlert('Failed to send SMS alert', 'error');
-                    // Simulate success for demo
-                        this.showAlert('📱 SMS alert simulated successfully (Demo Mode)', 'success');
-                        this.closeModal();
-                    }
-                })
-                .catch(error => {
-                    console.error('SMS error:', error);
-                    // Simulate success for demo
-                    this.showAlert('📱 SMS alert simulated successfully (Demo Mode)', 'success');
-                    this.closeModal();
-                });
-            }
-
-            // Email Report
-            sendEmail() {
-                const email = document.getElementById('emailAddress').value;
-                const subject = document.getElementById('emailSubject').value;
-                const message = document.getElementById('emailMessage').value;
-
-                if (!email || !subject || !message) {
-                    this.showAlert('Please fill all fields', 'error');
+                if (!phone || !transaction) {
+                    this.showAlert('Phone number or transaction data missing', 'error');
                     return;
                 }
 
-                fetch('/send-email-report', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        subject: subject,
-                        message: message,
-                        reportData: this.currentTransaction
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        this.showAlert('📧 Email report sent successfully', 'success');
+                if (!this.validatePhoneNumber(phone)) {
+                    this.showAlert('Please enter a valid mobile number with country code', 'error');
+                    return;
+                }
+
+                const message = this.generateSMSMessage(transaction);
+
+                try {
+                    // Show loading state
+                    const sendBtn = document.getElementById('sendSMS');
+                    const originalText = sendBtn.innerHTML;
+                    sendBtn.disabled = true;
+                    sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
+
+                    // Send SMS via backend API (you need to implement this endpoint)
+                    const response = await fetch('/api/send-sms', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            to: phone,
+                            message: message,
+                            transactionId: transaction.id
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.showAlert('✅ SMS alert sent successfully', 'success');
                         this.closeModal();
+                        console.log('SMS sent to:', phone);
+                        console.log('Message:', message);
                     } else {
-                        this.showAlert('Failed to send email report', 'error');
-                        // Simulate success for demo
-                        this.showAlert('📧 Email report simulated successfully (Demo Mode)', 'success');
-                        this.closeModal();
+                        throw new Error(result.error || 'Failed to send SMS');
                     }
-                })
-                .catch(error => {
-                    console.error('Email error:', error);
-                    // Simulate success for demo
-                    this.showAlert('📧 Email report simulated successfully (Demo Mode)', 'success');
-                    this.closeModal();
-                });
+
+                } catch (error) {
+                    console.error('SMS error:', error);
+                    this.showAlert('Failed to send SMS: ' + error.message, 'error');
+                    
+                    // Fallback: Show what would be sent in real implementation
+                    this.showAlert('📱 In production: SMS would be sent to ' + phone, 'info');
+                    console.log('SMS Details - To:', phone);
+                    console.log('SMS Message:', message);
+                } finally {
+                    // Reset button state
+                    const sendBtn = document.getElementById('sendSMS');
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = 'Send SMS';
+                }
             }
 
             loadTransactionHistory() {
@@ -1175,6 +1164,7 @@
                         <div class="txn-details">
                             <div>📍 ${txn.location}</div>
                             <div>🕒 ${txn.timestamp}</div>
+                            <div>📱 ${txn.mobileNumber}</div>
                         </div>
                         <div class="alert-badge ${txn.status}">
                             ${txn.status === 'suspicious' ? '🚨 Suspicious' : '✅ Clean'} (${txn.riskScore}%)
@@ -1310,7 +1300,7 @@
             }
         }
 
-      
+        // Initialize the system when page loads
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing system...');
             window.fraudSystem = new FraudDetectionSystem();
