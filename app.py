@@ -1,81 +1,77 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from twilio.rest import Client
+import json
 import os
-from dotenv import load_dotenv
-import re
-
-load_dotenv()
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 
-# Twilio configuration
-TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
-TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
-TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
-
-# Initialize Twilio client
-client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-
-def is_twilio_configured():
-    return all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER])
-
-def validate_phone_number(phone):
-    pattern = r'^\+\d{10,15}$'
-    return re.match(pattern, phone) is not None
-
-@app.route('/api/sms/send', methods=['POST'])
-def send_sms():
+# Load data files
+def load_json_file(filename):
     try:
-        data = request.get_json()
-        
-        if not data:
-            return jsonify({'success': False, 'error': 'No JSON data provided'}), 400
-        
-        to = data.get('to')
-        message = data.get('message')
-        transaction_id = data.get('transactionId')
-        
-        # Validation
-        if not to or not message:
-            return jsonify({'success': False, 'error': 'Missing required fields: to and message'}), 400
-        
-        if not validate_phone_number(to):
-            return jsonify({'success': False, 'error': 'Invalid phone number format'}), 400
-        
-        if not is_twilio_configured():
-            return jsonify({'success': False, 'error': 'SMS service not configured'}), 500
-        
-        # Send SMS
-        result = client.messages.create(
-            body=message,
-            from_=TWILIO_PHONE_NUMBER,
-            to=to
-        )
-        
-        # Log transaction
-        print(f"SMS Sent - Transaction: {transaction_id}, To: {to}, Message ID: {result.sid}")
-        
-        return jsonify({
-            'success': True,
-            'messageId': result.sid,
-            'status': result.status,
-            'to': to,
-            'transactionId': transaction_id
-        })
-        
-    except Exception as e:
-        print(f"SMS Error: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        with open(filename, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
 
-@app.route('/health', methods=['GET'])
-def health_check():
-    return jsonify({
-        'success': True,
-        'message': 'Fraud Detection API is running',
-        'sms_enabled': is_twilio_configured()
-    })
+def save_json_file(filename, data):
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=2)
+
+# Routes
+@app.route('/')
+def home():
+    return jsonify({"status": "connected", "message": "Transdetection Backend Running"})
+
+@app.route('/api/transactions', methods=['GET'])
+def get_transactions():
+    transactions = load_json_file('transactions.json')
+    return jsonify(transactions)
+
+@app.route('/api/transactions', methods=['POST'])
+def add_transaction():
+    transaction = request.json
+    transactions = load_json_file('transactions.json')
+    
+    # Add timestamp and ID
+    transaction['id'] = len(transactions) + 1
+    transaction['timestamp'] = datetime.now().isoformat()
+    
+    # Fraud detection logic
+    transaction['fraud_score'] = detect_fraud(transaction)
+    
+    transactions.append(transaction)
+    save_json_file('transactions.json', transactions)
+    
+    return jsonify({"status": "success", "transaction": transaction})
+
+@app.route('/api/status')
+def status():
+    return jsonify({"status": "connected", "timestamp": datetime.now().isoformat()})
+
+def detect_fraud(transaction):
+    # Basic fraud detection logic
+    fraud_patterns = load_json_file('fraud_patterns.json')
+    blacklist = load_json_file('blacklist.json')
+    
+    score = 0
+    
+    # Check amount
+    if transaction.get('amount', 0) > 10000:
+        score += 30
+    
+    # Check if in blacklist
+    if transaction.get('account_id') in blacklist.get('accounts', []):
+        score += 50
+    
+    # Check frequency patterns (simplified)
+    transactions = load_json_file('transactions.json')
+    recent_tx = [tx for tx in transactions if tx.get('account_id') == transaction.get('account_id')]
+    if len(recent_tx) > 5:  # More than 5 transactions recently
+        score += 20
+    
+    return min(score, 100)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3000)
+    app.run(debug=True, port=5000, host='0.0.0.0')
