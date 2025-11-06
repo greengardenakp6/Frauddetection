@@ -18,3 +18,24 @@ const CONFIG = {
 };
 
 console.log('Fraud Detection System Config Loaded');
+const config = {
+    backend: {
+        url: window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'https://your-backend-domain.com',
+        endpoints: {
+            status: '/api/status',
+            transactions: '/api/transactions'
+        }
+    },
+    twilio: {
+        enabled: true,
+        fromNumber: '+1234567890'
+    },
+    fraud: {
+        highRiskThreshold: 70,
+        alertEnabled: true
+    }
+};
+
+export default config;
