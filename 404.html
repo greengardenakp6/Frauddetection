@@ -654,7 +654,7 @@
                     <div class="form-group">
                         <label for="mobileNumber">MOBILE NUMBER FOR ALERTS</label>
                         <div class="input-group">
-                            <input type="tel" id="mobileNumber" placeholder="+1234567890" required>
+                            <input type="tel" id="mobileNumber" placeholder="+1234567890" value="+1234567890" required>
                             <div class="input-icon">📱</div>
                         </div>
                         <small style="color: #6c757d; font-size: 0.85em;">Enter your mobile number with country code</small>
@@ -684,13 +684,13 @@
                     <h5>🚀 Quick Backend Setup</h5>
                     <p>To enable SMS, run these commands:</p>
                     <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 0.8em; overflow-x: auto;">
-# Create backend folder
-mkdir backend
+# Navigate to backend folder
 cd backend
 
-# Create package.json and server.js files
-# Then run:
+# Install dependencies (first time only)
 npm install
+
+# Start the backend server
 npm start</pre>
                 </div>
             </div>
@@ -805,11 +805,13 @@ npm start</pre>
 
             async checkBackendConnection() {
                 try {
+                    console.log('Testing backend connection...');
                     const response = await fetch(`${CONFIG.backendUrl}/health`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                        }
+                        },
+                        mode: 'cors'
                     });
                     
                     if (response.ok) {
@@ -818,12 +820,12 @@ npm start</pre>
                         this.updateBackendStatus('Connected', 'Backend server is running successfully', 'success');
                         console.log('✅ Backend connected:', data);
                     } else {
-                        throw new Error('Backend not responding');
+                        throw new Error('Backend not responding properly');
                     }
                 } catch (error) {
+                    console.log('Backend connection failed:', error.message);
                     this.backendConnected = false;
                     this.updateBackendStatus('Not Connected', 'Backend server is not running. SMS features will not work.', 'error');
-                    console.warn('⚠️ Backend not connected:', error.message);
                 }
             }
 
@@ -836,13 +838,9 @@ npm start</pre>
                 statusMessage.textContent = message;
                 
                 if (type === 'error') {
-                    statusElement.classList.add('error');
-                    statusElement.style.background = '#f8d7da';
-                    statusElement.style.borderLeftColor = '#dc3545';
+                    statusElement.className = 'backend-status error';
                 } else {
-                    statusElement.classList.remove('error');
-                    statusElement.style.background = '#d4edda';
-                    statusElement.style.borderLeftColor = '#28a745';
+                    statusElement.className = 'backend-status';
                 }
             }
 
