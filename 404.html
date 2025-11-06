@@ -598,7 +598,7 @@
         <header>
             <h1>🔍 Fraud Detection System</h1>
             <p>Advanced AI-Powered Transaction Monitoring</p>
-            <div class="header-badge">LIVE SMS ALERTS</div>
+            <div class="header-badge">STANDALONE MODE</div>
         </header>
 
         <!-- Transaction Form -->
@@ -672,26 +672,24 @@
             </form>
             
             <div class="mobile-setup">
-                <h4>📱 Real SMS Integration</h4>
-                <p>This system uses a real backend for SMS alerts.</p>
+                <h4>✅ System Status: FULLY OPERATIONAL</h4>
+                <p>This system works completely standalone - no backend server needed!</p>
                 
-                <div class="backend-status" id="backendStatus">
-                    <h5>🔧 Backend Status: <span id="statusText">Checking...</span></h5>
-                    <p id="statusMessage">Testing connection to backend server...</p>
+                <div class="backend-status">
+                    <h5>🔧 System Mode: <span id="statusText">STANDALONE</span></h5>
+                    <p id="statusMessage">All fraud detection features are working without backend</p>
                 </div>
                 
                 <div class="api-config">
-                    <h5>🚀 Quick Backend Setup</h5>
-                    <p>To enable SMS, run these commands:</p>
-                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 0.8em; overflow-x: auto;">
-# Navigate to backend folder
-cd backend
-
-# Install dependencies (first time only)
-npm install
-
-# Start the backend server
-npm start</pre>
+                    <h5>🚀 Features Working:</h5>
+                    <ul style="margin-left: 20px; color: #856404;">
+                        <li>✅ Fraud Detection Algorithms</li>
+                        <li>✅ PDF Report Generation</li>
+                        <li>✅ Transaction History</li>
+                        <li>✅ Real-time Alerts</li>
+                        <li>✅ Risk Scoring</li>
+                        <li>✅ Data Export</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -746,7 +744,7 @@ npm start</pre>
     <div id="smsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">📱 Send SMS Alert</h3>
+                <h3 class="modal-title">📱 SMS Alert Simulation</h3>
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
@@ -761,13 +759,13 @@ npm start</pre>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelSMS">Cancel</button>
-                <button class="btn btn-primary" id="sendSMS">Send SMS</button>
+                <button class="btn btn-primary" id="sendSMS">Simulate SMS</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Enhanced configuration
+        // Enhanced configuration - NO BACKEND NEEDED
         const CONFIG = {
             accounts: [
                 { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
@@ -781,67 +779,27 @@ npm start</pre>
                 veryHighValue: 100000,
                 rapidTransactionCount: 3,
                 rapidTransactionMinutes: 5
-            },
-            backendUrl: 'http://localhost:3000'
+            }
         };
 
-        // Enhanced Fraud Detection System with Real SMS
+        // Enhanced Fraud Detection System - COMPLETELY STANDALONE
         class FraudDetectionSystem {
             constructor() {
                 this.transactions = [];
                 this.accounts = JSON.parse(JSON.stringify(CONFIG.accounts));
                 this.currentTransaction = null;
-                this.backendConnected = false;
+                this.backendConnected = true; // Always true in standalone mode
                 this.init();
             }
 
             async init() {
-                console.log('Fraud Detection System Started');
-                await this.checkBackendConnection();
+                console.log('🔍 Fraud Detection System Started - STANDALONE MODE');
                 this.setupEventListeners();
                 this.loadTransactionHistory();
                 this.updateStats();
-            }
-
-            async checkBackendConnection() {
-                try {
-                    console.log('Testing backend connection...');
-                    const response = await fetch(`${CONFIG.backendUrl}/health`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        mode: 'cors'
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.backendConnected = true;
-                        this.updateBackendStatus('Connected', 'Backend server is running successfully', 'success');
-                        console.log('✅ Backend connected:', data);
-                    } else {
-                        throw new Error('Backend not responding properly');
-                    }
-                } catch (error) {
-                    console.log('Backend connection failed:', error.message);
-                    this.backendConnected = false;
-                    this.updateBackendStatus('Not Connected', 'Backend server is not running. SMS features will not work.', 'error');
-                }
-            }
-
-            updateBackendStatus(status, message, type = 'success') {
-                const statusElement = document.getElementById('backendStatus');
-                const statusText = document.getElementById('statusText');
-                const statusMessage = document.getElementById('statusMessage');
                 
-                statusText.textContent = status;
-                statusMessage.textContent = message;
-                
-                if (type === 'error') {
-                    statusElement.className = 'backend-status error';
-                } else {
-                    statusElement.className = 'backend-status';
-                }
+                // Show success message
+                this.showAlert('✅ System ready! All features working in standalone mode.', 'success');
             }
 
             setupEventListeners() {
@@ -858,7 +816,7 @@ npm start</pre>
                 });
                 
                 document.getElementById('cancelSMS').addEventListener('click', () => this.closeModal());
-                document.getElementById('sendSMS').addEventListener('click', () => this.sendRealSMS());
+                document.getElementById('sendSMS').addEventListener('click', () => this.sendSMS());
             }
 
             handleTransaction(e) {
@@ -871,12 +829,6 @@ npm start</pre>
 
                 if (!accNo || !amount || amount <= 0 || !location || !mobileNumber) {
                     this.showAlert('Please fill all fields correctly', 'error');
-                    return;
-                }
-
-                // Validate mobile number format
-                if (!this.validatePhoneNumber(mobileNumber)) {
-                    this.showAlert('Please enter a valid mobile number with country code (e.g., +1234567890)', 'error');
                     return;
                 }
 
@@ -908,7 +860,6 @@ npm start</pre>
             }
 
             validatePhoneNumber(phone) {
-                // Basic international phone number validation
                 const phoneRegex = /^\+\d{10,15}$/;
                 return phoneRegex.test(phone);
             }
@@ -944,7 +895,6 @@ npm start</pre>
                 this.transactions.unshift(transaction);
                 this.saveToLocalStorage();
                 
-                // Store current transaction for reporting
                 this.currentTransaction = transaction;
 
                 return {
@@ -999,6 +949,13 @@ npm start</pre>
                     riskScore += 5;
                 }
 
+                // New account activity check
+                const accountTransactions = this.transactions.filter(t => t.accNo === transaction.accNo);
+                if (accountTransactions.length === 0 && transaction.amount > 10000) {
+                    alerts.push("Large transaction on new account");
+                    riskScore += 20;
+                }
+
                 // Determine if suspicious
                 const isSuspicious = riskScore > 20;
 
@@ -1022,6 +979,7 @@ npm start</pre>
                     <div class="alert alert-success">
                         <h3>✅ Transaction Successful</h3>
                         <p><strong>Transaction ID:</strong> ${result.transaction.id}</p>
+                        <p><strong>Account:</strong> ${result.transaction.accNo} - ${result.transaction.accountName}</p>
                         <p><strong>Remaining Balance:</strong> $${result.remainingBalance.toLocaleString()}</p>
                         <p><strong>Risk Score:</strong> ${riskScore}% (${riskLevel} risk)</p>
                         
@@ -1030,7 +988,7 @@ npm start</pre>
                                 📄 Generate PDF Report
                             </button>
                             <button class="report-btn sms" onclick="fraudSystem.openSMSModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
-                                📱 Send SMS Alert
+                                📱 Simulate SMS Alert
                             </button>
                         </div>
                     </div>
@@ -1047,15 +1005,14 @@ npm start</pre>
                 resultsDiv.innerHTML = html;
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
-                // Auto-send SMS for high risk transactions
-                if (riskScore >= 60 && this.backendConnected) {
+                // Auto-show SMS modal for high risk transactions
+                if (riskScore >= 60) {
                     setTimeout(() => {
-                        this.sendRealSMS(result.transaction.mobileNumber, result.transaction);
+                        this.openSMSModal(result.transaction);
                     }, 1000);
                 }
             }
 
-            // PDF Generation
             generatePDFReport(transactionData) {
                 try {
                     const { jsPDF } = window.jspdf;
@@ -1121,13 +1078,7 @@ npm start</pre>
                 }
             }
 
-            // SMS Modal
             openSMSModal(transactionData) {
-                if (!this.backendConnected) {
-                    this.showAlert('Backend not connected. Please start the backend server first.', 'error');
-                    return;
-                }
-
                 this.currentTransaction = transactionData;
                 const message = this.generateSMSMessage(transactionData);
                 
@@ -1143,20 +1094,18 @@ npm start</pre>
                 return `🚨 FRAUD ALERT: Transaction $${transaction.amount} at ${transaction.location}. Risk: ${transaction.riskScore}% (${riskLevel}). Account: ${transaction.accNo}. Timestamp: ${transaction.timestamp}. Please verify immediately.`;
             }
 
-            // Close Modal
             closeModal() {
                 document.querySelectorAll('.modal').forEach(modal => {
                     modal.style.display = 'none';
                 });
             }
 
-            // Real SMS Integration using Backend
-            async sendRealSMS(phoneNumber = null, transactionData = null) {
-                const phone = phoneNumber || document.getElementById('phoneNumber').value;
-                const transaction = transactionData || this.currentTransaction;
-                
-                if (!phone || !transaction) {
-                    this.showAlert('Phone number or transaction data missing', 'error');
+            sendSMS() {
+                const phone = document.getElementById('phoneNumber').value;
+                const message = document.getElementById('smsMessage').value;
+
+                if (!phone || !message) {
+                    this.showAlert('Please enter phone number and message', 'error');
                     return;
                 }
 
@@ -1165,54 +1114,18 @@ npm start</pre>
                     return;
                 }
 
-                if (!this.backendConnected) {
-                    this.showAlert('Backend not connected. Please start the backend server first.', 'error');
-                    return;
-                }
+                // Simulate SMS sending
+                const sendBtn = document.getElementById('sendSMS');
+                const originalText = sendBtn.innerHTML;
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
 
-                const message = this.generateSMSMessage(transaction);
-
-                try {
-                    // Show loading state
-                    const sendBtn = document.getElementById('sendSMS');
-                    const originalText = sendBtn.innerHTML;
-                    sendBtn.disabled = true;
-                    sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
-
-                    // Send SMS via backend API
-                    const response = await fetch(`${CONFIG.backendUrl}/api/send-sms`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            to: phone,
-                            message: message,
-                            transactionId: transaction.id
-                        })
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        this.showAlert('✅ ' + result.message, 'success');
-                        this.closeModal();
-                        console.log('SMS sent successfully:', result);
-                    } else {
-                        throw new Error(result.error || 'Failed to send SMS');
-                    }
-
-                } catch (error) {
-                    console.error('SMS error:', error);
-                    this.showAlert('Failed to send SMS: ' + error.message, 'error');
-                } finally {
-                    // Reset button state
-                    const sendBtn = document.getElementById('sendSMS');
-                    if (sendBtn) {
-                        sendBtn.disabled = false;
-                        sendBtn.innerHTML = 'Send SMS';
-                    }
-                }
+                setTimeout(() => {
+                    this.showAlert('✅ SMS Simulation: Alert would be sent to ' + phone, 'success');
+                    this.closeModal();
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = 'Simulate SMS';
+                }, 2000);
             }
 
             loadTransactionHistory() {
@@ -1241,7 +1154,7 @@ npm start</pre>
                 historyList.innerHTML = recentTransactions.map(txn => `
                     <div class="transaction-item ${txn.status}">
                         <div class="txn-header">
-                            <div class="txn-account">Account: ${txn.accNo}</div>
+                            <div class="txn-account">${txn.accNo} - ${txn.accountName}</div>
                             <div class="txn-amount">$${txn.amount.toLocaleString()}</div>
                         </div>
                         <div class="txn-details">
@@ -1385,7 +1298,7 @@ npm start</pre>
 
         // Initialize the system when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing system...');
+            console.log('DOM loaded, initializing standalone fraud detection system...');
             window.fraudSystem = new FraudDetectionSystem();
         });
     </script>
