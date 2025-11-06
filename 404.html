@@ -734,14 +734,7 @@
     </div>
 
     <script>
-        // Twilio Configuration - REPLACE WITH YOUR ACTUAL CREDENTIALS
-        const TWILIO_CONFIG = {
-            accountSid: ACf60f450f29fabf5d4dd01680f2052f48, 
-            authToken: 84d51f29f32f4a9c8f653dc0966d6ba6N,   
-            phoneNumber: +14787395985 
-        };
-
-        // Enhanced configuration
+        // Enhanced configuration with REAL Twilio credentials
         const CONFIG = {
             accounts: [
                 { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
@@ -755,10 +748,16 @@
                 veryHighValue: 100000,
                 rapidTransactionCount: 3,
                 rapidTransactionMinutes: 5
+            },
+            // REAL Twilio Configuration - Replace with your actual credentials
+            twilio: {
+                accountSid: 'ACa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6', // Replace with your Account SID
+                authToken: 'abc123def456ghi789jkl012mno345pqr678', // Replace with your Auth Token
+                fromNumber: '+1234567890' // Replace with your Twilio phone number
             }
         };
 
-        // Enhanced Fraud Detection System with Twilio SMS Integration
+        // Enhanced Fraud Detection System with Real SMS
         class FraudDetectionSystem {
             constructor() {
                 this.transactions = [];
@@ -771,7 +770,6 @@
                 console.log('Fraud Detection System Started');
                 this.setupEventListeners();
                 this.loadTransactionHistory();
-                this.displaySMSHistory();
                 this.updateStats();
             }
 
@@ -783,29 +781,13 @@
                 document.getElementById('clearHistory').addEventListener('click', () => this.clearHistory());
                 document.getElementById('exportData').addEventListener('click', () => this.exportData());
                 
-                // SMS History event listeners
-                document.getElementById('clearSMSHistory').addEventListener('click', () => this.clearSMSHistory());
-                document.getElementById('exportSMSHistory').addEventListener('click', () => this.exportSMSHistory());
-                
                 // Modal event listeners
                 document.querySelectorAll('.close-modal').forEach(btn => {
                     btn.addEventListener('click', () => this.closeModal());
                 });
                 
                 document.getElementById('cancelSMS').addEventListener('click', () => this.closeModal());
-                document.getElementById('cancelEmail').addEventListener('click', () => this.closeModal());
-                
-                document.getElementById('sendSMS').addEventListener('click', () => this.sendSMS());
-                document.getElementById('sendEmail').addEventListener('click', () => this.sendEmail());
-                
-                // Close modal when clicking outside
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            this.closeModal();
-                        }
-                    });
-                });
+                document.getElementById('sendSMS').addEventListener('click', () => this.sendRealSMS());
             }
 
             handleTransaction(e) {
@@ -814,9 +796,16 @@
                 const accNo = document.getElementById('accNo').value;
                 const amount = parseFloat(document.getElementById('amount').value);
                 const location = document.getElementById('location').value;
+                const mobileNumber = document.getElementById('mobileNumber').value;
 
-                if (!accNo || !amount || amount <= 0 || !location) {
+                if (!accNo || !amount || amount <= 0 || !location || !mobileNumber) {
                     this.showAlert('Please fill all fields correctly', 'error');
+                    return;
+                }
+
+                // Validate mobile number format
+                if (!this.validatePhoneNumber(mobileNumber)) {
+                    this.showAlert('Please enter a valid mobile number with country code (e.g., +1234567890)', 'error');
                     return;
                 }
 
@@ -830,7 +819,8 @@
                         const result = this.processTransaction({
                             accNo: parseInt(accNo),
                             amount: amount,
-                            location: location
+                            location: location,
+                            mobileNumber: mobileNumber
                         });
                         
                         this.displayResults(result);
@@ -844,6 +834,12 @@
                         submitBtn.innerHTML = originalText;
                     }
                 }, 1500);
+            }
+
+            validatePhoneNumber(phone) {
+                // Basic international phone number validation
+                const phoneRegex = /^\+\d{10,15}$/;
+                return phoneRegex.test(phone);
             }
 
             processTransaction(transactionData) {
@@ -965,9 +961,6 @@
                             <button class="report-btn sms" onclick="fraudSystem.openSMSModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
                                 📱 Send SMS Alert
                             </button>
-                            <button class="report-btn email" onclick="fraudSystem.openEmailModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
-                                📧 Email Report
-                            </button>
                         </div>
                     </div>
                 `;
@@ -983,17 +976,15 @@
                 resultsDiv.innerHTML = html;
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
-                // Auto-alert for high risk
+                // Auto-send SMS for high risk transactions
                 if (riskScore >= 60) {
                     setTimeout(() => {
-                        if (confirm('🚨 High-risk transaction detected! Send SMS alert to security team?')) {
-                            this.openSMSModal(result.transaction);
-                        }
-                    }, 2000);
+                        this.sendRealSMS(result.transaction.mobileNumber, result.transaction);
+                    }, 1000);
                 }
             }
 
-            // PDF Generation with SMS logs
+            // PDF Generation
             generatePDFReport(transactionData) {
                 try {
                     const { jsPDF } = window.jspdf;
@@ -1044,32 +1035,6 @@
                         doc.text(`• ${alert}`, 25, yPos);
                     });
                     
-                    // Add SMS notification history for this transaction
-                    const smsLogs = JSON.parse(localStorage.getItem('fraudSMSLogs') || '[]');
-                    const transactionSMS = smsLogs.filter(log => log.transactionId === transactionData.id);
-                    
-                    if (transactionSMS.length > 0) {
-                        yPos += 15;
-                        doc.setFontSize(16);
-                        doc.text('SMS Notifications Sent', 20, yPos);
-                        
-                        doc.setFontSize(10);
-                        transactionSMS.forEach(sms => {
-                            yPos += 8;
-                            if (yPos > 270) {
-                                doc.addPage();
-                                yPos = 20;
-                            }
-                            doc.text(`• To: ${sms.phoneNumber} - ${sms.timestamp}`, 25, yPos);
-                            yPos += 6;
-                            if (yPos > 270) {
-                                doc.addPage();
-                                yPos = 20;
-                            }
-                            doc.text(`  Message: ${sms.message.substring(0, 50)}...`, 25, yPos);
-                        });
-                    }
-                    
                     // Add footer
                     doc.setFontSize(10);
                     doc.setTextColor(128, 128, 128);
@@ -1088,21 +1053,18 @@
             // SMS Modal
             openSMSModal(transactionData) {
                 this.currentTransaction = transactionData;
-                const message = `🚨 Fraud Alert: Transaction $${transactionData.amount} at ${transactionData.location}. Risk: ${transactionData.riskScore}%. Check your account.`;
+                const message = this.generateSMSMessage(transactionData);
                 
+                document.getElementById('phoneNumber').value = transactionData.mobileNumber;
                 document.getElementById('smsMessage').value = message;
                 document.getElementById('smsModal').style.display = 'flex';
             }
 
-            // Email Modal
-            openEmailModal(transactionData) {
-                this.currentTransaction = transactionData;
-                const subject = `Fraud Detection Report - Transaction ${transactionData.id}`;
-                const message = `Dear Security Team,\n\nA transaction has been processed with the following details:\n\nTransaction ID: ${transactionData.id}\nAccount: ${transactionData.accNo} - ${transactionData.accountName}\nAmount: $${transactionData.amount}\nLocation: ${transactionData.location}\nRisk Score: ${transactionData.riskScore}%\nStatus: ${transactionData.status}\n\nAlerts:\n${transactionData.alerts.map(alert => `• ${alert}`).join('\n')}\n\nPlease review this transaction for potential fraud.\n\nBest regards,\nFraud Detection System`;
+            generateSMSMessage(transaction) {
+                const riskLevel = transaction.riskScore >= 60 ? 'HIGH RISK' : 
+                                transaction.riskScore >= 30 ? 'MEDIUM RISK' : 'LOW RISK';
                 
-                document.getElementById('emailSubject').value = subject;
-                document.getElementById('emailMessage').value = message;
-                document.getElementById('emailModal').style.display = 'flex';
+                return `🚨 FRAUD ALERT: Transaction $${transaction.amount} at ${transaction.location}. Risk: ${transaction.riskScore}% (${riskLevel}). Account: ${transaction.accNo}. Timestamp: ${transaction.timestamp}. Please verify immediately.`;
             }
 
             // Close Modal
@@ -1112,148 +1074,63 @@
                 });
             }
 
-            // SMS Alert with Twilio
-            sendSMS() {
-                const phoneNumber = document.getElementById('phoneNumber').value;
-                const message = document.getElementById('smsMessage').value;
-
-                if (!phoneNumber || !message) {
-                    this.showAlert('Please fill all fields', 'error');
+            // Real SMS Integration using Twilio
+            async sendRealSMS(phoneNumber = null, transactionData = null) {
+                const phone = phoneNumber || document.getElementById('phoneNumber').value;
+                const transaction = transactionData || this.currentTransaction;
+                
+                if (!phone || !transaction) {
+                    this.showAlert('Phone number or transaction data missing', 'error');
                     return;
                 }
 
-                // Show loading state
-                const sendBtn = document.getElementById('sendSMS');
-                const originalText = sendBtn.innerHTML;
-                sendBtn.disabled = true;
-                sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
+                if (!this.validatePhoneNumber(phone)) {
+                    this.showAlert('Please enter a valid mobile number with country code', 'error');
+                    return;
+                }
+
+                const message = this.generateSMSMessage(transaction);
 
                 try {
-                    // Initialize Twilio client
-                    const client = Twilio(TWILIO_CONFIG.accountSid, TWILIO_CONFIG.authToken);
+                    // Show loading state
+                    const sendBtn = document.getElementById('sendSMS');
+                    const originalText = sendBtn.innerHTML;
+                    sendBtn.disabled = true;
+                    sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
 
-                    // Send SMS via Twilio
-                    client.messages.create({
-                        body: message,
-                        from: TWILIO_CONFIG.+919994247213,
-                        to: +919994458119
-                    })
-                    .then(message => {
-                        console.log('SMS sent successfully:', message.sid);
-                        this.showAlert('📱 SMS alert sent successfully via Twilio', 'success');
-                        this.closeModal();
-                        
-                        // Log the SMS for tracking
-                        this.logSMSNotification({
-                            transactionId: this.currentTransaction.id,
-                            phoneNumber: phoneNumber,
+                    // Send SMS via backend API
+                    const response = await fetch('/api/send-sms', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            to: phone,
                             message: message,
-                            timestamp: new Date().toLocaleString(),
-                            twilioSid: message.sid
-                        });
-                        
-                        // Refresh SMS history display
-                        this.displaySMSHistory();
-                    })
-                    .catch(error => {
-                        console.error('Twilio SMS error:', error);
-                        this.showAlert(`Failed to send SMS: ${error.message}`, 'error');
-                    })
-                    .finally(() => {
-                        sendBtn.disabled = false;
-                        sendBtn.innerHTML = originalText;
+                            transactionId: transaction.id
+                        })
                     });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.showAlert('✅ SMS alert sent successfully', 'success');
+                        this.closeModal();
+                        console.log('SMS sent to:', phone);
+                        console.log('Message:', message);
+                    } else {
+                        throw new Error(result.error || 'Failed to send SMS');
+                    }
+
                 } catch (error) {
-                    console.error('Twilio initialization error:', error);
-                    this.showAlert('Twilio not configured properly. Please check your credentials.', 'error');
+                    console.error('SMS error:', error);
+                    this.showAlert('Failed to send SMS. Please check backend configuration.', 'error');
+                } finally {
+                    // Reset button state
+                    const sendBtn = document.getElementById('sendSMS');
                     sendBtn.disabled = false;
-                    sendBtn.innerHTML = originalText;
+                    sendBtn.innerHTML = 'Send SMS';
                 }
-            }
-
-            // Method to log SMS notifications
-            logSMSNotification(smsData) {
-                let smsLogs = JSON.parse(localStorage.getItem('fraudSMSLogs') || '[]');
-                smsLogs.unshift(smsData);
-                localStorage.setItem('fraudSMSLogs', JSON.stringify(smsLogs));
-            }
-
-            // Display SMS History
-            displaySMSHistory() {
-                const smsHistoryList = document.getElementById('smsHistoryList');
-                const smsLogs = JSON.parse(localStorage.getItem('fraudSMSLogs') || '[]');
-                const recentSMS = smsLogs.slice(0, 10);
-
-                if (recentSMS.length === 0) {
-                    smsHistoryList.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: #6c757d;">
-                            <div style="font-size: 3em; margin-bottom: 10px;">📱</div>
-                            <h3>No SMS notifications yet</h3>
-                            <p>Send an SMS alert to see history</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                smsHistoryList.innerHTML = recentSMS.map(sms => `
-                    <div class="transaction-item">
-                        <div class="txn-header">
-                            <div class="txn-account">To: ${sms.phoneNumber}</div>
-                            <div class="txn-amount">${sms.timestamp}</div>
-                        </div>
-                        <div class="txn-details">
-                            <div>Transaction ID: ${sms.transactionId}</div>
-                            <div>Twilio SID: ${sms.twilioSid || 'N/A'}</div>
-                        </div>
-                        <div class="alert-badge clean">
-                            ✅ Sent
-                        </div>
-                        <div style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">
-                            ${sms.message.substring(0, 100)}${sms.message.length > 100 ? '...' : ''}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Clear SMS History
-            clearSMSHistory() {
-                if (confirm('Are you sure you want to clear all SMS history? This cannot be undone.')) {
-                    localStorage.removeItem('fraudSMSLogs');
-                    this.displaySMSHistory();
-                    this.showAlert('🗑️ SMS history cleared successfully', 'success');
-                }
-            }
-
-            // Export SMS History
-            exportSMSHistory() {
-                const smsLogs = JSON.parse(localStorage.getItem('fraudSMSLogs') || '[]');
-                const exportData = {
-                    system: "Fraud Detection System - SMS Logs",
-                    exportDate: new Date().toISOString(),
-                    totalSMS: smsLogs.length,
-                    smsLogs: smsLogs
-                };
-                
-                this.downloadJSON(exportData, `sms-logs-${new Date().toISOString().split('T')[0]}.json`);
-                this.showAlert('💾 SMS history exported successfully', 'success');
-            }
-
-            // Email Report
-            sendEmail() {
-                const email = document.getElementById('emailAddress').value;
-                const subject = document.getElementById('emailSubject').value;
-                const message = document.getElementById('emailMessage').value;
-
-                if (!email || !subject || !message) {
-                    this.showAlert('Please fill all fields', 'error');
-                    return;
-                }
-
-                // Simulate email sending for demo
-                setTimeout(() => {
-                    this.showAlert('📧 Email report simulated successfully (Demo Mode)', 'success');
-                    this.closeModal();
-                }, 1000);
             }
 
             loadTransactionHistory() {
@@ -1288,6 +1165,7 @@
                         <div class="txn-details">
                             <div>📍 ${txn.location}</div>
                             <div>🕒 ${txn.timestamp}</div>
+                            <div>📱 ${txn.mobileNumber}</div>
                         </div>
                         <div class="alert-badge ${txn.status}">
                             ${txn.status === 'suspicious' ? '🚨 Suspicious' : '✅ Clean'} (${txn.riskScore}%)
