@@ -1107,7 +1107,37 @@ app.post('/api/send-sms', async (req, res) => {
                     modal.style.display = 'none';
                 });
             }
+// Update the sendRealSMS function to use your backend
+async sendRealSMS(phoneNumber = null, transactionData = null) {
+    const phone = phoneNumber || document.getElementById('phoneNumber').value;
+    const transaction = transactionData || this.currentTransaction;
+    
+    const message = this.generateSMSMessage(transaction);
 
+    try {
+        const response = await fetch('http://localhost:3000/api/sms/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                to: phone,
+                message: message,
+                transactionId: transaction.id
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            this.showAlert('✅ SMS alert sent successfully', 'success');
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        this.showAlert('Failed to send SMS: ' + error.message, 'error');
+    }
+}
             // Real SMS Integration using Twilio
             async sendRealSMS(phoneNumber = null, transactionData = null) {
                 const phone = phoneNumber || document.getElementById('phoneNumber').value;
