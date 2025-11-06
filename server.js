@@ -1,66 +1,33 @@
-const express = require('express');
-const cors = require('cors');
-const twilio = require('twilio');
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const twilio = require("twilio");
 
 const app = express();
-const PORT = 3000;
-
-// Middleware
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-// Simple SMS endpoint
-app.post('/api/send-sms', async (req, res) => {
-    try {
-        const { to, message, transactionId } = req.body;
+const accountSid = "YOUR_TWILIO_ACCOUNT_SID";
+const authToken = "YOUR_TWILIO_AUTH_TOKEN";
+const client = twilio(accountSid, authToken);
 
-        console.log('📱 SMS Request Received:', { to, message, transactionId });
-
-        // If Twilio credentials are provided, use real SMS
-        if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-            const client = twilio(
-                process.env.TWILIO_ACCOUNT_SID,
-                process.env.TWILIO_AUTH_TOKEN
-            );
-
-            const result = await client.messages.create({
-                body: message,
-                from: process.env.TWILIO_PHONE_NUMBER,
-                to: to
-            });
-
-            return res.json({
-                success: true,
-                messageId: result.sid,
-                status: 'sent',
-                message: 'SMS sent successfully via Twilio'
-            });
-        } else {
-            // Simulate SMS sending (for testing)
-            console.log('📲 SIMULATED SMS:', { to, message });
-            
-            return res.json({
-                success: true,
-                messageId: 'simulated-' + Date.now(),
-                status: 'delivered',
-                message: 'SMS simulated successfully (Twilio not configured)'
-            });
-        }
-    } catch (error) {
-        console.error('SMS Error:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
+// Backend check route
+app.get("/", (req, res) => {
+  res.send("Backend Connected ✅");
 });
 
-// Health check
-app.get('/health', (req, res) => {
-    res.json({ status: 'OK', message: 'Fraud Detection Backend is running' });
+// SMS sending route
+app.post("/send-sms", (req, res) => {
+  const { to, message } = req.body;
+  client.messages
+    .create({
+      body: message,
+      from: "YOUR_TWILIO_PHONE_NUMBER",
+      to: to,
+    })
+    .then(() => res.send("SMS sent successfully!"))
+    .catch((err) => res.status(500).send("Error: " + err.message));
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 Backend server running on http://localhost:${PORT}`);
-    console.log(`📧 SMS endpoint: http://localhost:${PORT}/api/send-sms`);
-});
+const PORT = 5000;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
