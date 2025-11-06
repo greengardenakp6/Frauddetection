@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fraud Detection System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/twilio@4.26.0/dist/twilio.min.js"></script>
     <style>
         * {
@@ -529,6 +528,22 @@
             gap: 10px;
         }
 
+        .mobile-setup {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .twilio-config {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+        }
+
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -560,7 +575,7 @@
         <header>
             <h1>🔍 Fraud Detection System</h1>
             <p>Advanced AI-Powered Transaction Monitoring</p>
-            <div class="header-badge">PREMIUM SECURITY SUITE</div>
+            <div class="header-badge">LIVE TWILIO SMS</div>
         </header>
 
         <!-- Transaction Form -->
@@ -596,19 +611,30 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="location">TRANSACTION LOCATION</label>
-                    <div class="input-group">
-                        <select id="location" required>
-                            <option value="">Select Location</option>
-                            <option value="New York" selected>🗽 New York</option>
-                            <option value="London">🇬🇧 London</option>
-                            <option value="Tokyo">🗼 Tokyo</option>
-                            <option value="Paris">🇫🇷 Paris</option>
-                            <option value="Sydney">🇦🇺 Sydney</option>
-                            <option value="Dubai">🇦🇪 Dubai</option>
-                        </select>
-                        <div class="input-icon">🌍</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="location">TRANSACTION LOCATION</label>
+                        <div class="input-group">
+                            <select id="location" required>
+                                <option value="">Select Location</option>
+                                <option value="New York" selected>🗽 New York</option>
+                                <option value="London">🇬🇧 London</option>
+                                <option value="Tokyo">🗼 Tokyo</option>
+                                <option value="Paris">🇫🇷 Paris</option>
+                                <option value="Sydney">🇦🇺 Sydney</option>
+                                <option value="Dubai">🇦🇪 Dubai</option>
+                            </select>
+                            <div class="input-icon">🌍</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mobileNumber">MOBILE NUMBER FOR ALERTS</label>
+                        <div class="input-group">
+                            <input type="tel" id="mobileNumber" placeholder="+1234567890" required>
+                            <div class="input-icon">📱</div>
+                        </div>
+                        <small style="color: #6c757d; font-size: 0.85em;">Enter your mobile number with country code</small>
                     </div>
                 </div>
 
@@ -621,6 +647,20 @@
                     </button>
                 </div>
             </form>
+            
+            <div class="mobile-setup">
+                <h4>📱 Direct Twilio SMS Integration</h4>
+                <p>This system uses Twilio directly for SMS alerts - no backend required!</p>
+                
+                <div class="twilio-config">
+                    <h5>🔧 Twilio Configuration</h5>
+                    <p>Update the Twilio credentials in the code with your actual credentials:</p>
+                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 0.8em; overflow-x: auto; margin-top: 10px;">
+   TWILIO_ACCOUNT_SID=ACf60f450f29fabf5d4dd01680f2052f48
+ TWILIO_AUTH_TOKEN=84d51f29f32f4a9c8f653dc0966d6ba6
+ TWILIO_PHONE_NUMBER=+14787395985</pre>
+                </div>
+            </div>
         </div>
 
         <!-- Dashboard Section -->
@@ -667,18 +707,6 @@
             </div>
             <div id="historyList" class="transaction-grid"></div>
         </div>
-
-        <!-- SMS History Section -->
-        <div class="history-container">
-            <div class="section-header">
-                <h3 class="section-title">📱 SMS Notification History</h3>
-                <div class="section-actions">
-                    <button class="action-btn" id="clearSMSHistory">🗑️ Clear</button>
-                    <button class="action-btn" id="exportSMSHistory">💾 Export</button>
-                </div>
-            </div>
-            <div id="smsHistoryList" class="transaction-grid"></div>
-        </div>
     </div>
 
     <!-- SMS Modal -->
@@ -691,50 +719,22 @@
             <div class="modal-body">
                 <div class="form-control">
                     <label for="phoneNumber">Phone Number</label>
-                    <input type="tel" id="phoneNumber" placeholder="+1234567890" value="+1234567890">
+                    <input type="tel" id="phoneNumber" placeholder="+1234567890">
                 </div>
                 <div class="form-control">
                     <label for="smsMessage">Message</label>
-                    <textarea id="smsMessage" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+                    <textarea id="smsMessage" rows="4"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelSMS">Cancel</button>
-                <button class="btn btn-primary" id="sendSMS">Send SMS</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Email Modal -->
-    <div id="emailModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">📧 Send Email Report</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-control">
-                    <label for="emailAddress">Email Address</label>
-                    <input type="email" id="emailAddress" placeholder="security@company.com" value="security@company.com">
-                </div>
-                <div class="form-control">
-                    <label for="emailSubject">Subject</label>
-                    <input type="text" id="emailSubject" placeholder="Fraud Detection Report">
-                </div>
-                <div class="form-control">
-                    <label for="emailMessage">Message</label>
-                    <textarea id="emailMessage" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelEmail">Cancel</button>
-                <button class="btn btn-primary" id="sendEmail">Send Email</button>
+                <button class="btn btn-primary" id="sendSMS">Send SMS via Twilio</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Enhanced configuration with REAL Twilio credentials
+        // Enhanced configuration with Twilio credentials
         const CONFIG = {
             accounts: [
                 { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
@@ -749,28 +749,41 @@
                 rapidTransactionCount: 3,
                 rapidTransactionMinutes: 5
             },
-            // REAL Twilio Configuration - Replace with your actual credentials
+            // REPLACE THESE WITH YOUR ACTUAL TWILIO CREDENTIALS
             twilio: {
-                accountSid: 'ACa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6', // Replace with your Account SID
-                authToken: 'abc123def456ghi789jkl012mno345pqr678', // Replace with your Auth Token
-                fromNumber: '+1234567890' // Replace with your Twilio phone number
+                accountSid: 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', // Your Account SID
+                authToken: 'your_auth_token_here', // Your Auth Token
+                fromNumber: '+1234567890' // Your Twilio phone number
             }
         };
 
-        // Enhanced Fraud Detection System with Real SMS
+        // Enhanced Fraud Detection System with Direct Twilio Integration
         class FraudDetectionSystem {
             constructor() {
                 this.transactions = [];
                 this.accounts = JSON.parse(JSON.stringify(CONFIG.accounts));
                 this.currentTransaction = null;
+                this.twilioClient = null;
                 this.init();
             }
 
             init() {
                 console.log('Fraud Detection System Started');
+                this.initializeTwilio();
                 this.setupEventListeners();
                 this.loadTransactionHistory();
                 this.updateStats();
+            }
+
+            initializeTwilio() {
+                try {
+                    // Initialize Twilio client
+                    this.twilioClient = new Twilio(CONFIG.twilio.accountSid, CONFIG.twilio.authToken);
+                    console.log('✅ Twilio client initialized');
+                } catch (error) {
+                    console.warn('⚠️ Twilio initialization failed:', error.message);
+                    this.showAlert('Twilio not configured. Please check your credentials.', 'warning');
+                }
             }
 
             setupEventListeners() {
@@ -787,7 +800,7 @@
                 });
                 
                 document.getElementById('cancelSMS').addEventListener('click', () => this.closeModal());
-                document.getElementById('sendSMS').addEventListener('click', () => this.sendRealSMS());
+                document.getElementById('sendSMS').addEventListener('click', () => this.sendTwilioSMS());
             }
 
             handleTransaction(e) {
@@ -837,7 +850,6 @@
             }
 
             validatePhoneNumber(phone) {
-                // Basic international phone number validation
                 const phoneRegex = /^\+\d{10,15}$/;
                 return phoneRegex.test(phone);
             }
@@ -959,7 +971,7 @@
                                 📄 Generate PDF Report
                             </button>
                             <button class="report-btn sms" onclick="fraudSystem.openSMSModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
-                                📱 Send SMS Alert
+                                📱 Send SMS via Twilio
                             </button>
                         </div>
                     </div>
@@ -977,9 +989,9 @@
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
                 // Auto-send SMS for high risk transactions
-                if (riskScore >= 60) {
+                if (riskScore >= 60 && this.twilioClient) {
                     setTimeout(() => {
-                        this.sendRealSMS(result.transaction.mobileNumber, result.transaction);
+                        this.sendTwilioSMS(result.transaction.mobileNumber, result.transaction);
                     }, 1000);
                 }
             }
@@ -1052,6 +1064,11 @@
 
             // SMS Modal
             openSMSModal(transactionData) {
+                if (!this.twilioClient) {
+                    this.showAlert('Twilio not configured. Please check your credentials.', 'error');
+                    return;
+                }
+
                 this.currentTransaction = transactionData;
                 const message = this.generateSMSMessage(transactionData);
                 
@@ -1074,8 +1091,8 @@
                 });
             }
 
-            // Real SMS Integration using Twilio
-            async sendRealSMS(phoneNumber = null, transactionData = null) {
+            // Direct Twilio SMS Integration
+            async sendTwilioSMS(phoneNumber = null, transactionData = null) {
                 const phone = phoneNumber || document.getElementById('phoneNumber').value;
                 const transaction = transactionData || this.currentTransaction;
                 
@@ -1089,6 +1106,11 @@
                     return;
                 }
 
+                if (!this.twilioClient) {
+                    this.showAlert('Twilio not configured. Please check your credentials.', 'error');
+                    return;
+                }
+
                 const message = this.generateSMSMessage(transaction);
 
                 try {
@@ -1096,40 +1118,27 @@
                     const sendBtn = document.getElementById('sendSMS');
                     const originalText = sendBtn.innerHTML;
                     sendBtn.disabled = true;
-                    sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
+                    sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending via Twilio...';
 
-                    // Send SMS via backend API
-                    const response = await fetch('/api/send-sms', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            to: phone,
-                            message: message,
-                            transactionId: transaction.id
-                        })
+                    // Send SMS directly via Twilio
+                    const result = await this.twilioClient.messages.create({
+                        body: message,
+                        from: CONFIG.twilio.fromNumber,
+                        to: phone
                     });
 
-                    const result = await response.json();
-
-                    if (result.success) {
-                        this.showAlert('✅ SMS alert sent successfully', 'success');
-                        this.closeModal();
-                        console.log('SMS sent to:', phone);
-                        console.log('Message:', message);
-                    } else {
-                        throw new Error(result.error || 'Failed to send SMS');
-                    }
+                    this.showAlert('✅ SMS sent successfully via Twilio! Message SID: ' + result.sid, 'success');
+                    this.closeModal();
+                    console.log('📱 Twilio SMS sent:', result);
 
                 } catch (error) {
-                    console.error('SMS error:', error);
-                    this.showAlert('Failed to send SMS. Please check backend configuration.', 'error');
+                    console.error('Twilio SMS error:', error);
+                    this.showAlert('Failed to send SMS via Twilio: ' + error.message, 'error');
                 } finally {
                     // Reset button state
                     const sendBtn = document.getElementById('sendSMS');
                     sendBtn.disabled = false;
-                    sendBtn.innerHTML = 'Send SMS';
+                    sendBtn.innerHTML = 'Send SMS via Twilio';
                 }
             }
 
