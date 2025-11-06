@@ -1,33 +1,83 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const twilio = require("twilio");
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs').promises;
+const path = require('path');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-const accountSid = "YOUR_TWILIO_ACCOUNT_SID";
-const authToken = "YOUR_TWILIO_AUTH_TOKEN";
-const client = twilio(accountSid, authToken);
+// Load JSON data
+async function loadJSON(filename) {
+    try {
+        const data = await fs.readFile(filename, 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        return [];
+    }
+}
 
-// Backend check route
-app.get("/", (req, res) => {
-  res.send("Backend Connected ✅");
+// Save JSON data
+async function saveJSON(filename, data) {
+    await fs.writeFile(filename, JSON.stringify(data, null, 2));
+}
+
+// Status endpoint
+app.get('/api/status', (req, res) => {
+    res.json({ 
+        status: 'connected', 
+        server: 'Node.js Backend',
+        timestamp: new Date().toISOString()
+    });
 });
 
-// SMS sending route
-app.post("/send-sms", (req, res) => {
-  const { to, message } = req.body;
-  client.messages
-    .create({
-      body: message,
-      from: "YOUR_TWILIO_PHONE_NUMBER",
-      to: to,
-    })
-    .then(() => res.send("SMS sent successfully!"))
-    .catch((err) => res.status(500).send("Error: " + err.message));
+// Get transactions
+app.get('/api/transactions', async (req, res) => {
+    try {
+        const transactions = await loadJSON('transactions.json');
+        res.json(transactions);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to load transactions' });
+    }
 });
 
-const PORT = 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+// Add transaction
+app.post('/api/transactions', async (req, res) => {
+    try {
+        const transaction = req.body;
+        const transactions = await loadJSON('transactions.json');
+        
+        // Add metadata
+        transaction.id = transactions.length + 1;
+        transaction.timestamp = new Date().toISOString();
+        transaction.fraud_score = await calculateFraudScore(transaction);
+        
+        transactions.push(transaction);
+        await saveJSON('transactions.json', transactions);
+        
+        res.json({ status: 'success', transaction });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to add transaction' });
+    }
+});
+
+// Fraud detection
+async function calculateFraudScore(transaction) {
+    const blacklist = await loadJSON('blacklist.json');
+    const patterns = await loadJSON('fraud_patterns.json');
+    
+    let score = 0;
+    
+    if (transaction.amount > 10000) score += 30;
+    if (blacklist.accounts?.includes(transaction.account_id)) score += 50;
+    if (transaction.location === 'high_risk_country') score += 25;
+    
+    return Math.min(score, 100);
+}
+
+app.listen(PORT, () => {
+    console.log(`🚀 Backend server running on port ${PORT}`);
+    console.log(`✅ Status: Connected`);
+});
