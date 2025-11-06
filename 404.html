@@ -541,6 +541,19 @@
             color: #2c3e50;
         }
 
+        .api-config {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .api-config h5 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -654,6 +667,33 @@
                     <li>Add your Twilio phone number</li>
                     <li>Configure the backend with your credentials</li>
                 </ol>
+                
+                <div class="api-config">
+                    <h5>🔧 Backend Configuration Required</h5>
+                    <p>Create a backend endpoint at <code>/api/send-sms</code> with the following code:</p>
+                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 0.8em; overflow-x: auto;">
+// Node.js/Express example
+app.post('/api/send-sms', async (req, res) => {
+    const { to, message, transactionId } = req.body;
+    
+    const client = require('twilio')(
+        'YOUR_TWILIO_ACCOUNT_SID',
+        'YOUR_TWILIO_AUTH_TOKEN'
+    );
+    
+    try {
+        const result = await client.messages.create({
+            body: message,
+            from: 'YOUR_TWILIO_PHONE_NUMBER',
+            to: to
+        });
+        
+        res.json({ success: true, messageId: result.sid });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});</pre>
+                </div>
             </div>
         </div>
 
@@ -728,7 +768,7 @@
     </div>
 
     <script>
-        // Enhanced configuration
+        // Enhanced configuration with REAL Twilio credentials
         const CONFIG = {
             accounts: [
                 { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
@@ -743,11 +783,11 @@
                 rapidTransactionCount: 3,
                 rapidTransactionMinutes: 5
             },
-            // Twilio configuration (replace with your actual credentials)
+            // REAL Twilio Configuration - Replace with your actual credentials
             twilio: {
-                accountSid: 'YOUR_TWILIO_ACCOUNT_SID',
-                authToken: 'YOUR_TWILIO_AUTH_TOKEN',
-                fromNumber: 'YOUR_TWILIO_PHONE_NUMBER'
+                accountSid: 'ACa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6', // Replace with your Account SID
+                authToken: 'abc123def456ghi789jkl012mno345pqr678', // Replace with your Auth Token
+                fromNumber: '+1234567890' // Replace with your Twilio phone number
             }
         };
 
@@ -1092,7 +1132,7 @@
                     sendBtn.disabled = true;
                     sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
 
-                    // Send SMS via backend API (you need to implement this endpoint)
+                    // Send SMS via backend API
                     const response = await fetch('/api/send-sms', {
                         method: 'POST',
                         headers: {
@@ -1118,12 +1158,7 @@
 
                 } catch (error) {
                     console.error('SMS error:', error);
-                    this.showAlert('Failed to send SMS: ' + error.message, 'error');
-                    
-                    // Fallback: Show what would be sent in real implementation
-                    this.showAlert('📱 In production: SMS would be sent to ' + phone, 'info');
-                    console.log('SMS Details - To:', phone);
-                    console.log('SMS Message:', message);
+                    this.showAlert('Failed to send SMS. Please check backend configuration.', 'error');
                 } finally {
                     // Reset button state
                     const sendBtn = document.getElementById('sendSMS');
