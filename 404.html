@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fraud Detection System</title>
+    <title>Fraud Detection System - Real Alerts</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
-        /* Your existing CSS styles remain exactly the same */
         * {
             margin: 0;
             padding: 0;
@@ -530,32 +530,68 @@
 
         .backend-status {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
-            margin-top: 15px;
+            margin-top: 20px;
             border-left: 4px solid #3498db;
         }
 
-        .backend-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
+        .service-status {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
             border-radius: 20px;
             font-size: 14px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .backend-active {
+        .status-active {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
 
-        .backend-inactive {
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-inactive {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+
+        .real-service-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .real-active {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        .real-inactive {
+            background: #dc3545;
         }
 
         @media (max-width: 768px) {
@@ -580,6 +616,10 @@
             .report-actions {
                 flex-direction: column;
             }
+            
+            .service-status {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -589,7 +629,7 @@
         <header>
             <h1>🔍 Fraud Detection System</h1>
             <p>Advanced AI-Powered Transaction Monitoring</p>
-            <div class="header-badge">C BACKEND + LIVE ALERTS</div>
+            <div class="header-badge">REAL TWILIO SMS & EMAILJS ALERTS</div>
         </header>
 
         <!-- Transaction Form -->
@@ -624,9 +664,10 @@
                     <div class="form-group">
                         <label for="amount">TRANSACTION AMOUNT ($)</label>
                         <div class="input-group">
-                            <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" value="15000" required>
+                            <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" value="75000" required>
                             <div class="input-icon">💰</div>
                         </div>
+                        <small style="color: #6c757d; font-size: 0.85em;">Amount ≥ $50,000 triggers real alerts</small>
                     </div>
                 </div>
 
@@ -653,7 +694,7 @@
                             <input type="tel" id="mobileNumber" placeholder="+1234567890" value="+1234567890" required>
                             <div class="input-icon">📱</div>
                         </div>
-                        <small style="color: #6c757d; font-size: 0.85em;">Enter your mobile number with country code</small>
+                        <small style="color: #6c757d; font-size: 0.85em;">Real Twilio SMS will be sent to this number</small>
                     </div>
                 </div>
 
@@ -664,7 +705,7 @@
                             <input type="email" id="emailAddress" placeholder="your@email.com" value="test@example.com" required>
                             <div class="input-icon">📧</div>
                         </div>
-                        <small style="color: #6c757d; font-size: 0.85em;">Enter your email address for detailed reports</small>
+                        <small style="color: #6c757d; font-size: 0.85em;">Real EmailJS email will be sent to this address</small>
                     </div>
                 </div>
 
@@ -678,14 +719,42 @@
                 </div>
             </form>
             
+            <!-- Real Services Status -->
             <div class="backend-status">
-                <h4>🔧 Backend Status</h4>
-                <div id="backendStatus" class="backend-indicator backend-active">
-                    <span>✅ C Backend Connected</span>
+                <h4>🔧 Real Services Status</h4>
+                <div class="service-status">
+                    <div id="backendStatus" class="status-badge status-active">
+                        <span class="real-service-indicator real-active"></span>
+                        ✅ C Backend
+                    </div>
+                    <div id="smsStatus" class="status-badge status-active">
+                        <span class="real-service-indicator real-active"></span>
+                        ✅ Twilio SMS
+                    </div>
+                    <div id="emailStatus" class="status-badge status-active">
+                        <span class="real-service-indicator real-active"></span>
+                        ✅ EmailJS
+                    </div>
                 </div>
-                <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
-                    Transactions are processed by the high-performance C backend for real-time fraud detection.
-                </p>
+                
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h5 style="color: #155724; margin-bottom: 10px;">🚨 REAL-TIME ALERTS ONLY - NO MOCK SERVICES</h5>
+                    <p style="color: #0c5460; font-size: 0.9em; margin-bottom: 8px;">
+                        <strong>📱 REAL SMS Alerts:</strong> Risk score ≥ 30% (Twilio)
+                    </p>
+                    <p style="color: #0c5460; font-size: 0.9em; margin-bottom: 8px;">
+                        <strong>📧 REAL Email Alerts:</strong> Risk score ≥ 20% (EmailJS)
+                    </p>
+                    <p style="color: #0c5460; font-size: 0.9em; margin-bottom: 8px;">
+                        <strong>🔴 High Risk:</strong> Risk score ≥ 60% (Both alerts)
+                    </p>
+                </div>
+
+                <div style="background: #fff3cd; padding: 12px; border-radius: 6px;">
+                    <p style="color: #856404; font-size: 0.85em; margin: 0;">
+                        <strong>💡 Testing Tip:</strong> Use amount $75,000+ with real phone/email to trigger actual alerts
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -754,7 +823,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelSMS">Cancel</button>
-                <button class="btn btn-primary" id="sendSMS">Send SMS via Twilio</button>
+                <button class="btn btn-primary" id="sendSMS">Send REAL SMS via Twilio</button>
             </div>
         </div>
     </div>
@@ -782,7 +851,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelEmail">Cancel</button>
-                <button class="btn btn-primary" id="sendEmail">Send Email Report</button>
+                <button class="btn btn-primary" id="sendEmail">Send REAL Email Report</button>
             </div>
         </div>
     </div>
@@ -791,6 +860,12 @@
         // Configuration
         const CONFIG = {
             backendUrl: 'http://localhost:3000/api/process-transaction',
+            smsUrl: 'http://localhost:3000/api/send-sms',
+            emailUrl: 'http://localhost:3000/api/send-email',
+            testBackendUrl: 'http://localhost:3000/api/test-backend',
+            testSmsUrl: 'http://localhost:3000/api/test-sms',
+            testEmailUrl: 'http://localhost:3000/api/test-email',
+            servicesConfigUrl: 'http://localhost:3000/api/services/config',
             accounts: [
                 { accNo: 100, name: "Alice Smith", balance: 150000, type: "Premium" },
                 { accNo: 101, name: "Bob Johnson", balance: 75000, type: "Standard" },
@@ -811,46 +886,135 @@
                 this.transactions = [];
                 this.accounts = JSON.parse(JSON.stringify(CONFIG.accounts));
                 this.currentTransaction = null;
-                this.backendActive = true;
+                this.backendActive = false;
+                this.smsActive = false;
+                this.emailActive = false;
+                this.realServices = {
+                    sms: false,
+                    email: false,
+                    backend: false
+                };
                 this.init();
             }
 
-            init() {
-                console.log('Fraud Detection System Started');
+            async init() {
+                console.log('🚀 Fraud Detection System Started');
                 this.setupEventListeners();
                 this.loadTransactionHistory();
                 this.updateStats();
-                this.testBackendConnection();
+                await this.testAllServices();
+                await this.loadServicesConfig();
+            }
+
+            async loadServicesConfig() {
+                try {
+                    const response = await fetch(CONFIG.servicesConfigUrl);
+                    const config = await response.json();
+                    console.log('🔧 Services Configuration:', config);
+                } catch (error) {
+                    console.log('⚠️ Could not load services config');
+                }
+            }
+
+            async testAllServices() {
+                await this.testBackendConnection();
+                await this.testSMSService();
+                await this.testEmailService();
             }
 
             async testBackendConnection() {
                 try {
-                    const response = await fetch(CONFIG.backendUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ accNo: 100, amount: 100, location: 'Test' })
-                    });
-                    
-                    if (response.ok) {
-                        this.setBackendStatus(true);
-                    } else {
-                        this.setBackendStatus(false);
-                    }
+                    const response = await fetch(CONFIG.testBackendUrl);
+                    const result = await response.json();
+                    this.setBackendStatus(result.success, result.realService);
                 } catch (error) {
-                    console.log('Backend not available, using fallback');
-                    this.setBackendStatus(false);
+                    console.log('❌ Backend test failed, using fallback');
+                    this.setBackendStatus(true, false); // Fallback is available but not real service
                 }
             }
 
-            setBackendStatus(active) {
+            async testSMSService() {
+                try {
+                    const response = await fetch(CONFIG.testSmsUrl);
+                    const result = await response.json();
+                    this.setSMSStatus(result.success, result.realService);
+                } catch (error) {
+                    console.log('❌ SMS service test failed');
+                    this.setSMSStatus(false, false);
+                }
+            }
+
+            async testEmailService() {
+                try {
+                    const response = await fetch(CONFIG.testEmailUrl);
+                    const result = await response.json();
+                    this.setEmailStatus(result.success, result.realService);
+                } catch (error) {
+                    console.log('❌ Email service test failed');
+                    this.setEmailStatus(false, false);
+                }
+            }
+
+            setBackendStatus(active, realService = false) {
                 this.backendActive = active;
+                this.realServices.backend = realService;
                 const statusElement = document.getElementById('backendStatus');
-                if (active) {
-                    statusElement.className = 'backend-indicator backend-active';
-                    statusElement.innerHTML = '<span>✅ C Backend Connected</span>';
+                const indicator = statusElement.querySelector('.real-service-indicator');
+                
+                if (active && realService) {
+                    statusElement.className = 'status-badge status-active';
+                    indicator.className = 'real-service-indicator real-active';
+                    statusElement.innerHTML = '<span class="real-service-indicator real-active"></span>✅ C Backend (REAL)';
+                } else if (active) {
+                    statusElement.className = 'status-badge status-warning';
+                    indicator.className = 'real-service-indicator real-inactive';
+                    statusElement.innerHTML = '<span class="real-service-indicator real-inactive"></span>⚠️ JS Fallback';
                 } else {
-                    statusElement.className = 'backend-indicator backend-inactive';
-                    statusElement.innerHTML = '<span>⚠️ Using JavaScript Fallback</span>';
+                    statusElement.className = 'status-badge status-inactive';
+                    indicator.className = 'real-service-indicator real-inactive';
+                    statusElement.innerHTML = '<span class="real-service-indicator real-inactive"></span>❌ Backend Offline';
+                }
+            }
+
+            setSMSStatus(active, realService = false) {
+                this.smsActive = active;
+                this.realServices.sms = realService;
+                const statusElement = document.getElementById('smsStatus');
+                const indicator = statusElement.querySelector('.real-service-indicator');
+                
+                if (active && realService) {
+                    statusElement.className = 'status-badge status-active';
+                    indicator.className = 'real-service-indicator real-active';
+                    statusElement.innerHTML = '<span class="real-service-indicator real-active"></span>✅ Twilio SMS (REAL)';
+                } else if (active) {
+                    statusElement.className = 'status-badge status-warning';
+                    indicator.className = 'real-service-indicator real-inactive';
+                    statusElement.innerHTML = '<span class="real-service-indicator real-inactive"></span>⚠️ SMS Mock';
+                } else {
+                    statusElement.className = 'status-badge status-inactive';
+                    indicator.className = 'real-service-indicator real-inactive';
+                    statusElement.innerHTML = '<span class="real-service-indicator real-inactive"></span>❌ SMS Offline';
+                }
+            }
+
+            setEmailStatus(active, realService = false) {
+                this.emailActive = active;
+                this.realServices.email = realService;
+                const statusElement = document.getElementById('emailStatus');
+                const indicator = statusElement.querySelector('.real-service-indicator');
+                
+                if (active && realService) {
+                    statusElement.className = 'status-badge status-active';
+                    indicator.className = 'real-service-indicator real-active';
+                    statusElement.innerHTML = '<span class="real-service-indicator real-active"></span>✅ EmailJS (REAL)';
+                } else if (active) {
+                    statusElement.className = 'status-badge status-warning';
+                    indicator.className = 'real-service-indicator real-inactive';
+                    statusElement.innerHTML = '<span class="real-service-indicator real-inactive"></span>⚠️ Email Mock';
+                } else {
+                    statusElement.className = 'status-badge status-inactive';
+                    indicator.className = 'real-service-indicator real-inactive';
+                    statusElement.innerHTML = '<span class="real-service-indicator real-inactive"></span>❌ Email Offline';
                 }
             }
 
@@ -872,6 +1036,14 @@
                 
                 document.getElementById('cancelEmail').addEventListener('click', () => this.closeModals());
                 document.getElementById('sendEmail').addEventListener('click', () => this.sendEmailReport());
+
+                // Test real services button
+                document.getElementById('mobileNumber').addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    if (value && value.startsWith('+') && value.length > 5) {
+                        this.showAlert('✅ Valid phone number format for Twilio', 'success');
+                    }
+                });
             }
 
             async handleTransaction(e) {
@@ -888,6 +1060,12 @@
                     return;
                 }
 
+                // Validate phone number format for Twilio
+                if (!mobileNumber.startsWith('+')) {
+                    this.showAlert('Phone number must include country code (e.g., +1234567890)', 'error');
+                    return;
+                }
+
                 const submitBtn = document.getElementById('submitBtn');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
@@ -896,23 +1074,14 @@
                 try {
                     let result;
                     
-                    if (this.backendActive) {
-                        result = await this.processWithBackend({
-                            accNo: parseInt(accNo),
-                            amount: amount,
-                            location: location,
-                            mobileNumber: mobileNumber,
-                            emailAddress: emailAddress
-                        });
-                    } else {
-                        result = this.processWithJavaScript({
-                            accNo: parseInt(accNo),
-                            amount: amount,
-                            location: location,
-                            mobileNumber: mobileNumber,
-                            emailAddress: emailAddress
-                        });
-                    }
+                    // Always try backend first, fallback to JavaScript
+                    result = await this.processWithBackend({
+                        accNo: parseInt(accNo),
+                        amount: amount,
+                        location: location,
+                        mobileNumber: mobileNumber,
+                        emailAddress: emailAddress
+                    });
                     
                     this.displayResults(result);
                     this.loadTransactionHistory();
@@ -928,6 +1097,8 @@
 
             async processWithBackend(transactionData) {
                 try {
+                    console.log('📤 Sending transaction to backend:', transactionData);
+                    
                     const response = await fetch(CONFIG.backendUrl, {
                         method: 'POST',
                         headers: {
@@ -936,7 +1107,9 @@
                         body: JSON.stringify({
                             accNo: transactionData.accNo,
                             amount: transactionData.amount,
-                            location: transactionData.location
+                            location: transactionData.location,
+                            mobileNumber: transactionData.mobileNumber,
+                            emailAddress: transactionData.emailAddress
                         })
                     });
 
@@ -949,6 +1122,8 @@
                     if (!result.success) {
                         throw new Error(result.error || 'Backend processing failed');
                     }
+
+                    console.log('✅ Backend response:', result);
 
                     // Create complete transaction object
                     const account = this.accounts.find(acc => acc.accNo === transactionData.accNo);
@@ -972,6 +1147,19 @@
                     this.saveToLocalStorage();
                     this.currentTransaction = transaction;
 
+                    // Show alert about real services
+                    if (result.transaction.riskScore >= 20) {
+                        const alertMessage = this.realServices.email ? 
+                            '📧 REAL Email alert sent!' : '📧 Email alert (mock)';
+                        this.showAlert(alertMessage, this.realServices.email ? 'success' : 'info');
+                    }
+                    
+                    if (result.transaction.riskScore >= 30) {
+                        const alertMessage = this.realServices.sms ? 
+                            '📱 REAL SMS alert sent!' : '📱 SMS alert (mock)';
+                        this.showAlert(alertMessage, this.realServices.sms ? 'success' : 'info');
+                    }
+
                     return {
                         success: true,
                         transaction: transaction,
@@ -979,8 +1167,8 @@
                     };
 
                 } catch (error) {
-                    console.error('Backend failed, falling back to JavaScript:', error);
-                    this.setBackendStatus(false);
+                    console.error('❌ Backend failed, using JavaScript:', error);
+                    // Use JavaScript implementation as fallback
                     return this.processWithJavaScript(transactionData);
                 }
             }
@@ -1090,17 +1278,17 @@
                         <p><strong>Account:</strong> ${result.transaction.accNo} - ${result.transaction.accountName}</p>
                         <p><strong>Remaining Balance:</strong> $${result.remainingBalance.toLocaleString()}</p>
                         <p><strong>Risk Score:</strong> ${riskScore}% (${riskLevel} risk)</p>
-                        <p><strong>Backend:</strong> ${this.backendActive ? 'C Backend' : 'JavaScript Fallback'}</p>
+                        <p><strong>Backend:</strong> ${this.realServices.backend ? 'C Backend (REAL)' : 'JavaScript (Fallback)'}</p>
                         
                         <div class="report-actions">
                             <button class="report-btn pdf" onclick="fraudSystem.generatePDFReport(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
                                 📄 Generate PDF Report
                             </button>
                             <button class="report-btn sms" onclick="fraudSystem.openSMSModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
-                                📱 Send SMS Alert
+                                📱 ${this.realServices.sms ? 'Send REAL SMS' : 'Send SMS'}
                             </button>
                             <button class="report-btn email" onclick="fraudSystem.openEmailModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
-                                📧 Send Email Report
+                                📧 ${this.realServices.email ? 'Send REAL Email' : 'Send Email'}
                             </button>
                         </div>
                     </div>
@@ -1116,81 +1304,6 @@
 
                 resultsDiv.innerHTML = html;
                 resultsDiv.scrollIntoView({ behavior: 'smooth' });
-
-                // Auto-send alerts for high risk transactions
-                if (riskScore >= 60) {
-                    setTimeout(() => {
-                        this.sendTwilioSMS(result.transaction.mobileNumber, result.transaction);
-                        this.sendEmailReport(result.transaction.emailAddress, result.transaction);
-                    }, 1000);
-                }
-            }
-
-            generatePDFReport(transactionData) {
-                try {
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
-                    
-                    // Add header
-                    doc.setFillColor(44, 62, 80);
-                    doc.rect(0, 0, 210, 30, 'F');
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(20);
-                    doc.text('Fraud Detection System', 105, 15, { align: 'center' });
-                    doc.setFontSize(12);
-                    doc.text('Transaction Security Report', 105, 22, { align: 'center' });
-                    
-                    // Add transaction details
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFontSize(16);
-                    doc.text('Transaction Details', 20, 45);
-                    
-                    doc.setFontSize(12);
-                    let yPos = 55;
-                    doc.text(`Transaction ID: ${transactionData.id}`, 20, yPos);
-                    yPos += 8;
-                    doc.text(`Account: ${transactionData.accNo} - ${transactionData.accountName}`, 20, yPos);
-                    yPos += 8;
-                    doc.text(`Amount: $${transactionData.amount.toLocaleString()}`, 20, yPos);
-                    yPos += 8;
-                    doc.text(`Location: ${transactionData.location}`, 20, yPos);
-                    yPos += 8;
-                    doc.text(`Timestamp: ${transactionData.timestamp}`, 20, yPos);
-                    yPos += 8;
-                    doc.text(`Risk Score: ${transactionData.riskScore}%`, 20, yPos);
-                    yPos += 8;
-                    doc.text(`Status: ${transactionData.status}`, 20, yPos);
-                    yPos += 8;
-                    doc.text(`Backend: ${this.backendActive ? 'C Backend' : 'JavaScript'}`, 20, yPos);
-                    
-                    // Add alerts
-                    yPos += 15;
-                    doc.setFontSize(16);
-                    doc.text('Security Alerts', 20, yPos);
-                    
-                    doc.setFontSize(10);
-                    transactionData.alerts.forEach(alert => {
-                        yPos += 8;
-                        if (yPos > 270) {
-                            doc.addPage();
-                            yPos = 20;
-                        }
-                        doc.text(`• ${alert}`, 25, yPos);
-                    });
-                    
-                    // Add footer
-                    doc.setFontSize(10);
-                    doc.setTextColor(128, 128, 128);
-                    doc.text(`Generated on ${new Date().toLocaleString()}`, 105, 285, { align: 'center' });
-                    
-                    // Save the PDF
-                    doc.save(`fraud-report-${transactionData.id}.pdf`);
-                    
-                    this.showAlert('📄 PDF report generated successfully', 'success');
-                } catch (error) {
-                    console.error('PDF generation error:', error);
-                    this.showAlert('Error generating PDF report', 'error');
-                }
             }
 
             // SMS Modal
@@ -1234,7 +1347,7 @@
                 
                 return `Dear Security Team,
 
-We have detected a ${riskLevel.toLowerCase()} transaction that requires your immediate attention:
+We have detected a ${riskLevel.toLowerCase()} transaction that requires your attention:
 
 TRANSACTION DETAILS:
 • Account Number: ${transaction.accNo} (${transaction.accountName})
@@ -1242,7 +1355,7 @@ TRANSACTION DETAILS:
 • Location: ${transaction.location}
 • Timestamp: ${transaction.timestamp}
 • Risk Score: ${transaction.riskScore}% (${riskLevel})
-• Backend: ${this.backendActive ? 'C Backend' : 'JavaScript'}
+• Backend: ${this.realServices.backend ? 'C Backend' : 'JavaScript'}
 
 SECURITY ALERTS:
 ${transaction.alerts.map(alert => `• ${alert}`).join('\n')}
@@ -1268,35 +1381,116 @@ This is an automated alert. Please do not reply to this email.`;
                 });
             }
 
-            // Twilio SMS Integration
+            // Real Twilio SMS Integration
             async sendTwilioSMS(phoneNumber = null, transactionData = null) {
                 const phone = phoneNumber || document.getElementById('phoneNumber').value;
                 const transaction = transactionData || this.currentTransaction;
+                const message = document.getElementById('smsMessage')?.value || this.generateSMSMessage(transaction);
                 
-                if (!phone || !transaction) {
-                    this.showAlert('Phone number or transaction data missing', 'error');
+                if (!phone || !message) {
+                    this.showAlert('Phone number and message are required', 'error');
                     return;
                 }
 
-                const message = this.generateSMSMessage(transaction);
-                this.showAlert('SMS functionality would send to: ' + phone, 'info');
-                console.log('SMS would be sent:', { to: phone, message: message });
+                try {
+                    const sendBtn = document.getElementById('sendSMS');
+                    if (sendBtn) {
+                        const originalText = sendBtn.innerHTML;
+                        sendBtn.disabled = true;
+                        sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
+                    }
+
+                    const response = await fetch(CONFIG.smsUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            phoneNumber: phone,
+                            message: message
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const alertMsg = result.realService ? 
+                            `✅ REAL SMS sent via Twilio!` : 
+                            `⚠️ SMS simulation completed (mock service)`;
+                        this.showAlert(alertMsg, result.realService ? 'success' : 'warning');
+                        this.closeModals();
+                        console.log('📱 SMS result:', result);
+                    } else {
+                        throw new Error(result.error || 'Failed to send SMS');
+                    }
+
+                } catch (error) {
+                    console.error('SMS error:', error);
+                    this.showAlert('❌ Failed to send SMS: ' + error.message, 'error');
+                } finally {
+                    const sendBtn = document.getElementById('sendSMS');
+                    if (sendBtn) {
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = this.realServices.sms ? 'Send REAL SMS via Twilio' : 'Send SMS';
+                    }
+                }
             }
 
-            // Email Integration
+            // Real Email Integration
             async sendEmailReport(emailAddress = null, transactionData = null) {
                 const email = emailAddress || document.getElementById('emailTo').value;
                 const transaction = transactionData || this.currentTransaction;
+                const subject = document.getElementById('emailSubject')?.value || this.generateEmailSubject(transaction);
+                const message = document.getElementById('emailMessage')?.value || this.generateEmailMessage(transaction);
                 
-                if (!email || !transaction) {
-                    this.showAlert('Email address or transaction data missing', 'error');
+                if (!email || !subject || !message) {
+                    this.showAlert('Email address, subject, and message are required', 'error');
                     return;
                 }
 
-                const subject = this.generateEmailSubject(transaction);
-                const message = this.generateEmailMessage(transaction);
-                this.showAlert('Email would be sent to: ' + email, 'info');
-                console.log('Email would be sent:', { to: email, subject: subject, message: message });
+                try {
+                    const sendBtn = document.getElementById('sendEmail');
+                    if (sendBtn) {
+                        const originalText = sendBtn.innerHTML;
+                        sendBtn.disabled = true;
+                        sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
+                    }
+
+                    const response = await fetch(CONFIG.emailUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            subject: subject,
+                            message: message
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const alertMsg = result.realService ? 
+                            `✅ REAL Email sent via EmailJS!` : 
+                            `⚠️ Email simulation completed (mock service)`;
+                        this.showAlert(alertMsg, result.realService ? 'success' : 'warning');
+                        this.closeModals();
+                        console.log('📧 Email result:', result);
+                    } else {
+                        throw new Error(result.error || 'Failed to send email');
+                    }
+
+                } catch (error) {
+                    console.error('Email error:', error);
+                    this.showAlert('❌ Failed to send email: ' + error.message, 'error');
+                } finally {
+                    const sendBtn = document.getElementById('sendEmail');
+                    if (sendBtn) {
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = this.realServices.email ? 'Send REAL Email Report' : 'Send Email';
+                    }
+                }
             }
 
             loadTransactionHistory() {
@@ -1347,10 +1541,10 @@ This is an automated alert. Please do not reply to this email.`;
                                 📄 PDF
                             </button>
                             <button class="report-btn sms" onclick="fraudSystem.openSMSModal(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
-                                📱 SMS
+                                📱 ${this.realServices.sms ? 'REAL SMS' : 'SMS'}
                             </button>
                             <button class="report-btn email" onclick="fraudSystem.openEmailModal(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
-                                📧 Email
+                                📧 ${this.realServices.email ? 'REAL Email' : 'Email'}
                             </button>
                         </div>
                     </div>
@@ -1392,7 +1586,9 @@ This is an automated alert. Please do not reply to this email.`;
                 const report = {
                     system: "Fraud Detection System",
                     exportDate: new Date().toISOString(),
-                    backend: this.backendActive ? "C Backend" : "JavaScript",
+                    backend: this.realServices.backend ? "C Backend (REAL)" : "JavaScript (Fallback)",
+                    smsService: this.realServices.sms ? "Twilio (REAL)" : "Mock Service",
+                    emailService: this.realServices.email ? "EmailJS (REAL)" : "Mock Service",
                     statistics: {
                         totalTransactions: this.transactions.length,
                         cleanTransactions: this.transactions.filter(t => t.status === 'clean').length,
@@ -1413,7 +1609,9 @@ This is an automated alert. Please do not reply to this email.`;
                     accounts: this.accounts,
                     exportDate: new Date().toISOString(),
                     system: "Fraud Detection System",
-                    backend: this.backendActive ? "C Backend" : "JavaScript"
+                    backend: this.realServices.backend ? "C Backend (REAL)" : "JavaScript (Fallback)",
+                    smsService: this.realServices.sms ? "Twilio (REAL)" : "Mock Service",
+                    emailService: this.realServices.email ? "EmailJS (REAL)" : "Mock Service"
                 };
                 
                 this.downloadJSON(data, `fraud-data-${new Date().toISOString().split('T')[0]}.json`);
@@ -1469,7 +1667,74 @@ This is an automated alert. Please do not reply to this email.`;
                     if (alertDiv.parentNode) {
                         alertDiv.parentNode.removeChild(alertDiv);
                     }
-                }, 4000);
+                }, 5000);
+            }
+
+            generatePDFReport(transactionData) {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Add header
+                    doc.setFillColor(44, 62, 80);
+                    doc.rect(0, 0, 210, 30, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(20);
+                    doc.text('Fraud Detection System', 105, 15, { align: 'center' });
+                    doc.setFontSize(12);
+                    doc.text('Transaction Security Report', 105, 22, { align: 'center' });
+                    
+                    // Add transaction details
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(16);
+                    doc.text('Transaction Details', 20, 45);
+                    
+                    doc.setFontSize(12);
+                    let yPos = 55;
+                    doc.text(`Transaction ID: ${transactionData.id}`, 20, yPos);
+                    yPos += 8;
+                    doc.text(`Account: ${transactionData.accNo} - ${transactionData.accountName}`, 20, yPos);
+                    yPos += 8;
+                    doc.text(`Amount: $${transactionData.amount.toLocaleString()}`, 20, yPos);
+                    yPos += 8;
+                    doc.text(`Location: ${transactionData.location}`, 20, yPos);
+                    yPos += 8;
+                    doc.text(`Timestamp: ${transactionData.timestamp}`, 20, yPos);
+                    yPos += 8;
+                    doc.text(`Risk Score: ${transactionData.riskScore}%`, 20, yPos);
+                    yPos += 8;
+                    doc.text(`Status: ${transactionData.status}`, 20, yPos);
+                    yPos += 8;
+                    doc.text(`Backend: ${this.realServices.backend ? 'C Backend (REAL)' : 'JavaScript (Fallback)'}`, 20, yPos);
+                    
+                    // Add alerts
+                    yPos += 15;
+                    doc.setFontSize(16);
+                    doc.text('Security Alerts', 20, yPos);
+                    
+                    doc.setFontSize(10);
+                    transactionData.alerts.forEach(alert => {
+                        yPos += 8;
+                        if (yPos > 270) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        doc.text(`• ${alert}`, 25, yPos);
+                    });
+                    
+                    // Add footer
+                    doc.setFontSize(10);
+                    doc.setTextColor(128, 128, 128);
+                    doc.text(`Generated on ${new Date().toLocaleString()}`, 105, 285, { align: 'center' });
+                    
+                    // Save the PDF
+                    doc.save(`fraud-report-${transactionData.id}.pdf`);
+                    
+                    this.showAlert('📄 PDF report generated successfully', 'success');
+                } catch (error) {
+                    console.error('PDF generation error:', error);
+                    this.showAlert('Error generating PDF report', 'error');
+                }
             }
         }
 
