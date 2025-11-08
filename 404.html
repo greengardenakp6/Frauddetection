@@ -598,6 +598,28 @@
             text-decoration: underline;
         }
 
+        .sms-fix-info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .sms-fix-info h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sms-fix-info p {
+            font-size: 0.9em;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -733,8 +755,8 @@
                     <div id="smsStatus" class="status-badge status-active">
                         <span>✅ Twilio SMS Active</span>
                     </div>
-                    <div id="emailStatus" class="status-badge status-inactive">
-                        <span>❌ Email Offline</span>
+                    <div id="emailStatus" class="status-badge status-active">
+                        <span>✅ Email Service Active</span>
                     </div>
                 </div>
                 <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
@@ -743,6 +765,13 @@
                 <div style="margin-top: 10px; font-size: 0.8em; color: #28a745;">
                     <strong>📱 SMS Test:</strong> Use amounts over $50,000 to trigger automatic SMS alerts
                 </div>
+            </div>
+
+            <div class="sms-fix-info">
+                <h4>🔧 SMS Service Fix</h4>
+                <p><strong>Issue:</strong> Twilio requires server-side implementation for security reasons.</p>
+                <p><strong>Solution:</strong> This demo simulates SMS sending. For production, you need a backend server.</p>
+                <p><strong>Test:</strong> Try transactions over $50,000 to see SMS simulation in action!</p>
             </div>
 
             <div class="twilio-info">
@@ -823,16 +852,44 @@
         </div>
     </div>
 
+    <!-- Email Modal -->
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">📧 Send Email Report</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-control">
+                    <label for="emailTo">Email Address</label>
+                    <input type="email" id="emailTo" placeholder="your@email.com" value="your@email.com">
+                </div>
+                <div class="form-control">
+                    <label for="emailSubject">Subject</label>
+                    <input type="text" id="emailSubject" placeholder="Fraud Detection Report">
+                </div>
+                <div class="form-control">
+                    <label for="emailMessage">Message</label>
+                    <textarea id="emailMessage" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelEmail">Cancel</button>
+                <button class="btn btn-primary" id="sendEmail">Send Real Email</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Configuration with YOUR REAL credentials
         const CONFIG = {
-            // Twilio credentials (replace with your actual credentials)
+            // Twilio credentials from your screenshot
             twilio: {
-                accountSid: 'ACf60f450f29fabf5d4dd01680f2052f48',
-                authToken: '614f4f07bfff3587434f76ae4be21d25',
+                accountSid: 'ACf601450f29fabf5d4dd01680f2052f48',
+                authToken: '614f4f07bfff3587434f76ae4be2td25',
                 phoneNumber: '+14787395985'
             },
-            // EmailJS credentials
+            // EmailJS credentials from your screenshot
             emailjs: {
                 publicKey: 'CaMVUkQYox6o96Q29',
                 serviceId: 'service_akash',
@@ -865,14 +922,17 @@
                 this.transactions = [];
                 this.accounts = CONFIG.accounts;
                 this.backendActive = true;
-                this.smsActive = true;
-                this.emailActive = false;
+                this.smsActive = true; // Force SMS to active for demo
+                this.emailActive = true;
                 this.currentTransaction = null;
                 this.init();
             }
 
             async init() {
                 console.log('🚀 Fraud Detection System Started - REAL SERVICES');
+                console.log('Twilio Account SID:', CONFIG.twilio.accountSid);
+                console.log('EmailJS Public Key:', CONFIG.emailjs.publicKey);
+                
                 this.setupEventListeners();
                 this.loadTransactionHistory();
                 this.updateStats();
@@ -883,7 +943,7 @@
             async initializeEmailJS() {
                 try {
                     emailjs.init(CONFIG.emailjs.publicKey);
-                    console.log('✅ EmailJS initialized');
+                    console.log('✅ EmailJS initialized successfully');
                     this.setEmailStatus(true);
                 } catch (error) {
                     console.error('❌ EmailJS initialization failed:', error);
@@ -892,18 +952,20 @@
             }
 
             async testTwilioService() {
-                // Test Twilio by attempting to send a test SMS
                 try {
-                    const testResponse = await this.sendSMSDirect('+1234567890', '🔍 Fraud Detection System Test: Services are active and ready!');
-                    if (testResponse.success) {
-                        this.setSMSStatus(true);
-                        console.log('✅ Twilio SMS: ACTIVE - Ready to send real SMS');
-                    } else {
-                        this.setSMSStatus(false);
-                    }
+                    // Initialize Twilio client
+                    const client = Twilio(CONFIG.twilio.accountSid, CONFIG.twilio.authToken);
+                    console.log('✅ Twilio client initialized');
+                    
+                    // For demo purposes, we'll simulate successful SMS service
+                    // In production, you would need a backend server
+                    this.setSMSStatus(true);
+                    console.log('✅ Twilio SMS: ACTIVE (Simulated for demo)');
+                    
                 } catch (error) {
-                    console.log('❌ Twilio service test failed');
-                    this.setSMSStatus(false);
+                    console.log('⚠️ Twilio browser limitations - using simulation:', error);
+                    // Even if Twilio fails in browser, we'll simulate it for demo
+                    this.setSMSStatus(true);
                 }
             }
 
@@ -921,7 +983,7 @@
                 const statusEl = document.getElementById('emailStatus');
                 if (statusEl) {
                     statusEl.className = active ? 'status-badge status-active' : 'status-badge status-inactive';
-                    statusEl.innerHTML = active ? '✅ Email Service' : '❌ Email Offline';
+                    statusEl.innerHTML = active ? '✅ Email Service Active' : '❌ Email Offline';
                 }
             }
 
@@ -939,7 +1001,19 @@
                 });
                 
                 document.getElementById('cancelSMS').addEventListener('click', () => this.closeModal());
+                document.getElementById('cancelEmail').addEventListener('click', () => this.closeModal());
+                
                 document.getElementById('sendSMS').addEventListener('click', () => this.sendRealSMS());
+                document.getElementById('sendEmail').addEventListener('click', () => this.sendRealEmail());
+                
+                // Close modal when clicking outside
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            this.closeModal();
+                        }
+                    });
+                });
             }
 
             async handleTransaction(e) {
@@ -1019,6 +1093,13 @@
                     setTimeout(() => {
                         this.sendRealSMS(transaction.mobileNumber, transaction);
                     }, 1000);
+                }
+
+                // Auto-send Email for high risk transactions
+                if (fraudResult.riskScore >= CONFIG.thresholds.autoAlertThreshold && this.emailActive) {
+                    setTimeout(() => {
+                        this.sendRealEmail(transaction.emailAddress, transaction);
+                    }, 1500);
                 }
 
                 return {
@@ -1108,6 +1189,9 @@
                             </button>
                             <button class="report-btn sms" onclick="fraudSystem.openSMSModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
                                 📱 Send SMS Alert
+                            </button>
+                            <button class="report-btn email" onclick="fraudSystem.openEmailModal(${JSON.stringify(result.transaction).replace(/\"/g, '&quot;')})">
+                                📧 Email Report
                             </button>
                         </div>
                     </div>
@@ -1233,6 +1317,57 @@
                 return `🚨 FRAUD ALERT: Transaction $${transaction.amount} at ${transaction.location}. Risk: ${transaction.riskScore}% (${riskLevel}). Account: ${transaction.accNo}. Timestamp: ${transaction.timestamp}. Please verify immediately.`;
             }
 
+            // Email Modal
+            openEmailModal(transactionData) {
+                this.currentTransaction = transactionData;
+                const subject = this.generateEmailSubject(transactionData);
+                const message = this.generateEmailMessage(transactionData);
+                
+                document.getElementById('emailTo').value = transactionData.emailAddress;
+                document.getElementById('emailSubject').value = subject;
+                document.getElementById('emailMessage').value = message;
+                document.getElementById('emailModal').style.display = 'flex';
+            }
+
+            generateEmailSubject(transaction) {
+                const riskLevel = transaction.riskScore >= 60 ? 'HIGH RISK' : 
+                                transaction.riskScore >= 30 ? 'MEDIUM RISK' : 'LOW RISK';
+                return `🚨 Fraud Detection Alert - ${riskLevel} - Transaction $${transaction.amount}`;
+            }
+
+            generateEmailMessage(transaction) {
+                const riskLevel = transaction.riskScore >= 60 ? 'HIGH RISK' : 
+                                transaction.riskScore >= 30 ? 'MEDIUM RISK' : 'LOW RISK';
+                
+                return `Dear Security Team,
+
+We have detected a ${riskLevel.toLowerCase()} transaction that requires your immediate attention:
+
+TRANSACTION DETAILS:
+• Account Number: ${transaction.accNo} (${transaction.accountName})
+• Transaction Amount: $${transaction.amount.toLocaleString()}
+• Location: ${transaction.location}
+• Timestamp: ${transaction.timestamp}
+• Risk Score: ${transaction.riskScore}% (${riskLevel})
+• Remaining Balance: $${transaction.remainingBalance.toLocaleString()}
+
+SECURITY ALERTS:
+${transaction.alerts.map(alert => `• ${alert}`).join('\n')}
+
+RECOMMENDED ACTIONS:
+${transaction.riskScore >= 60 ? '• IMMEDIATE: Freeze account and contact customer\n• Investigate for potential fraud' : 
+  transaction.riskScore >= 30 ? '• REVIEW: Verify transaction with customer\n• Monitor account for suspicious activity' : 
+  '• MONITOR: No immediate action required'}
+
+Please review this transaction and take appropriate action.
+
+Best regards,
+Fraud Detection System
+
+---
+This is an automated alert. Please do not reply to this email.`;
+            }
+
             // Close Modal
             closeModal() {
                 document.querySelectorAll('.modal').forEach(modal => {
@@ -1240,28 +1375,21 @@
                 });
             }
 
-            // REAL SMS Alert via Twilio
+            // REAL SMS Alert via Twilio (Simulated for demo)
             async sendSMSDirect(phoneNumber, message) {
-                // This would normally be done via a backend server for security
-                // For demo purposes, we'll simulate the response
+                // For demo purposes, we simulate SMS sending
+                // In production, you would need a backend server to securely send SMS
                 
-                // In a real implementation, you would make a request to your backend:
-                // const response = await fetch('/api/send-sms', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({
-                //         to: phoneNumber,
-                //         message: message,
-                //         twilio: CONFIG.twilio
-                //     })
-                // });
-                
-                // For demo, simulate successful SMS sending
                 return new Promise((resolve) => {
                     setTimeout(() => {
-                        console.log(`📱 SMS sent to ${phoneNumber}: ${message}`);
-                        resolve({ success: true, message: 'SMS sent successfully' });
-                    }, 1000);
+                        console.log(`📱 SMS SIMULATION: Message sent to ${phoneNumber}`);
+                        console.log(`Message: ${message}`);
+                        resolve({ 
+                            success: true, 
+                            message: 'SMS sent successfully (simulated)',
+                            sid: 'SM' + Date.now().toString()
+                        });
+                    }, 1500);
                 });
             }
 
@@ -1291,9 +1419,9 @@
                     const result = await this.sendSMSDirect(phone, message);
 
                     if (result.success) {
-                        this.showAlert('✅ REAL SMS sent successfully to your phone!', 'success');
+                        this.showAlert('✅ SMS sent successfully! (Simulated for demo)', 'success');
                         this.closeModal();
-                        console.log('📱 SMS sent via Twilio:', result);
+                        console.log('📱 SMS simulation result:', result);
                     } else {
                         throw new Error(result.error || 'Failed to send SMS');
                     }
@@ -1306,6 +1434,67 @@
                     if (sendBtn) {
                         sendBtn.disabled = false;
                         sendBtn.innerHTML = 'Send Real SMS via Twilio';
+                    }
+                }
+            }
+
+            // REAL Email Report via EmailJS
+            async sendRealEmail(emailAddress = null, transactionData = null) {
+                if (!this.emailActive) {
+                    this.showAlert('❌ Email service is currently offline', 'error');
+                    return;
+                }
+
+                const email = emailAddress || document.getElementById('emailTo').value;
+                const transaction = transactionData || this.currentTransaction;
+                const subject = document.getElementById('emailSubject')?.value || this.generateEmailSubject(transaction);
+                const message = document.getElementById('emailMessage')?.value || this.generateEmailMessage(transaction);
+                
+                if (!email || !subject || !message) {
+                    this.showAlert('Email address, subject, and message are required', 'error');
+                    return;
+                }
+
+                try {
+                    const sendBtn = document.getElementById('sendEmail');
+                    if (sendBtn) {
+                        const originalText = sendBtn.innerHTML;
+                        sendBtn.disabled = true;
+                        sendBtn.innerHTML = '<div class="loading-spinner"></div> Sending...';
+                    }
+
+                    const templateParams = {
+                        to_email: email,
+                        subject: subject,
+                        message: message,
+                        transaction_id: transaction.id,
+                        account_number: transaction.accNo,
+                        amount: transaction.amount,
+                        risk_score: transaction.riskScore
+                    };
+
+                    const result = await emailjs.send(
+                        CONFIG.emailjs.serviceId,
+                        CONFIG.emailjs.templateId,
+                        templateParams
+                    );
+
+                    if (result.status === 200) {
+                        this.showAlert('✅ REAL Email sent successfully!', 'success');
+                        this.closeModal();
+                        console.log('📧 Email sent:', result);
+                    } else {
+                        throw new Error('Failed to send email');
+                    }
+
+                } catch (error) {
+                    console.error('Email error:', error);
+                    this.showAlert('❌ Failed to send email. Please check your EmailJS configuration.', 'error');
+                } finally {
+                    const sendBtn = document.getElementById('sendEmail');
+                    if (sendBtn) {
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = 'Send Real Email';
                     }
                 }
             }
@@ -1359,6 +1548,9 @@
                             </button>
                             <button class="report-btn sms" onclick="fraudSystem.openSMSModal(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
                                 📱 SMS
+                            </button>
+                            <button class="report-btn email" onclick="fraudSystem.openEmailModal(${JSON.stringify(txn).replace(/\"/g, '&quot;')})" style="padding: 5px 10px; font-size: 12px;">
+                                📧 Email
                             </button>
                         </div>
                     </div>
